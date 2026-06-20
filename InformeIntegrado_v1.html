@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe Integrado — KÓR</title>
+<style>
+  :root{
+    --tinta:#1f2933; --suave:#52606d; --linea:#d2d6dc; --fondo:#f7f8fa;
+    --tarjeta:#ffffff; --acento:#2c5282; --acento-suave:#ebf1f8;
+    --ok:#2f855a; --neutro:#b7791f; --alerta:#c53030;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--tinta);background:var(--fondo);line-height:1.5;font-size:16px;}
+  .wrap{max-width:820px;margin:0 auto;padding:16px;}
+  header.banner{background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:18px;margin-bottom:16px;}
+  header.banner h1{font-size:1.15rem;margin:0 0 4px;}
+  header.banner p.sub{margin:0;color:var(--suave);font-size:0.9rem;}
+  section.bloque{background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:16px;margin-bottom:16px;}
+  section.bloque > h2{font-size:1rem;margin:0 0 8px;color:var(--acento);}
+  .campo{margin-bottom:14px;}
+  .campo label{display:block;font-weight:600;font-size:0.92rem;margin-bottom:6px;}
+  .campo input, .campo select, .campo textarea{width:100%;padding:10px;border:1px solid var(--linea);border-radius:7px;font-size:1rem;background:#fff;font-family:inherit;}
+  textarea{min-height:90px;resize:vertical;}
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 20px;}
+  button{font-size:1rem;font-weight:600;padding:13px 20px;border-radius:8px;border:none;cursor:pointer;}
+  .btn-primario{background:var(--acento);color:#fff;} .btn-primario:hover{background:#244166;}
+  .btn-primario:disabled{opacity:.6;cursor:default;}
+  .btn-sec{background:#fff;color:var(--acento);border:1px solid var(--acento);}
+  .aviso{font-size:0.9rem;padding:10px 12px;border-radius:7px;margin-bottom:12px;display:none;}
+  .aviso.err{background:#fff5f5;color:var(--alerta);border:1px solid #f4c7c7;display:block;}
+  .aviso.ok{background:#f0fff4;color:var(--ok);border:1px solid #c6f6d5;display:block;}
+  .pantalla{display:none;} .pantalla.activa{display:block;}
+  .login-card{max-width:380px;margin:40px auto;background:var(--tarjeta);border:1px solid var(--linea);border-radius:10px;padding:24px;}
+  .login-card h2{margin:0 0 16px;font-size:1.05rem;color:var(--acento);}
+  .muted{color:var(--suave);font-size:0.85rem;}
+  table.res{width:100%;border-collapse:collapse;font-size:0.86rem;}
+  table.res th, table.res td{border:1px solid var(--linea);padding:7px 9px;text-align:left;vertical-align:top;}
+  table.res th{background:var(--acento-suave);color:#2b4a6b;}
+  .scroll-x{overflow-x:auto;}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.76rem;font-weight:700;color:#fff;}
+  .tag.fav{background:var(--ok);} .tag.neu{background:var(--neutro);} .tag.des{background:var(--alerta);}
+  .fuente{border-left:4px solid var(--acento);padding-left:10px;margin-bottom:6px;font-weight:700;color:var(--acento);}
+  .nota{background:#fffaf0;border:1px solid #f0e0c0;border-radius:8px;padding:10px 12px;font-size:0.85rem;color:#7a5c1e;margin-top:8px;}
+  @media print {
+    body * { visibility: hidden !important; }
+    #reporteImprimible, #reporteImprimible * { visibility: visible !important; }
+    #reporteImprimible { position:absolute !important; left:0 !important; top:0 !important; width:100% !important; z-index:auto !important; }
+  }
+  @page { margin: 12mm; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div id="pantallaLogin" class="pantalla activa">
+    <div class="login-card">
+      <h2>Informe integrado — acceso del consultor</h2>
+      <div id="avisoLogin" class="aviso err"></div>
+      <div class="campo"><label for="email">Correo</label><input type="email" id="email" autocomplete="username"></div>
+      <div class="campo"><label for="pass">Contraseña</label><input type="password" id="pass" autocomplete="current-password"></div>
+      <div class="acciones" style="margin-bottom:0;">
+        <button id="btnLogin" class="btn-primario" onclick="login()">Entrar</button>
+      </div>
+      <p class="muted" style="margin-top:14px;">Herramienta interna. Genera el informe agregado del estudio cruzando madurez, clima y bienestar.</p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="pantallaApp" class="pantalla">
+    <header class="banner">
+      <h1>Informe integrado del estudio</h1>
+      <p class="sub">Triangula las tres fuentes del mismo estudio. El PDF resultante es agregado: no incluye respuestas individuales, textos abiertos ni indicadores de alerta sensibles.</p>
+    </header>
+
+    <section class="bloque">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <span class="muted">Sesión iniciada.</span>
+        <button class="btn-sec" style="padding:8px 14px;font-size:0.9rem;" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h2>1. Elige el estudio</h2>
+      <div class="campo"><label for="selEstudio">Código de estudio</label>
+        <select id="selEstudio"><option value="">Cargando…</option></select></div>
+      <div class="acciones" style="margin-bottom:0;">
+        <button id="btnGenerar" class="btn-primario" onclick="generar()">Generar informe</button>
+      </div>
+      <div id="avisoGen" class="aviso"></div>
+    </section>
+
+    <div id="resultado" style="display:none;">
+      <!-- Vista previa de datos -->
+      <section class="bloque">
+        <h2>2. Datos del estudio (vista previa)</h2>
+        <div id="previa"></div>
+      </section>
+
+      <!-- Borrador editable -->
+      <section class="bloque">
+        <h2>3. Borrador del informe (edítalo antes de exportar)</h2>
+        <p class="muted" style="margin-bottom:12px;">La app pre-redacta estos textos desde los datos. Son un punto de partida; ajústalos con tu criterio profesional. La triangulación final es tuya.</p>
+        <div class="campo"><label>Nombre legible del estudio (para la portada)</label><input type="text" id="txtNombre" placeholder="Ej. Estudio Norte"></div>
+        <div class="campo"><label>Resumen ejecutivo</label><textarea id="txtResumen"></textarea></div>
+        <div class="campo"><label>Lectura — Madurez de la gestión de personas</label><textarea id="txtMadurez"></textarea></div>
+        <div class="campo"><label>Lectura — Clima organizacional</label><textarea id="txtClima"></textarea></div>
+        <div class="campo"><label>Lectura — Bienestar laboral</label><textarea id="txtBienestar"></textarea></div>
+        <div class="campo"><label>Lectura integrada (cruce de las tres fuentes)</label><textarea id="txtIntegrada" style="min-height:130px;"></textarea></div>
+        <div class="campo"><label>Recomendaciones y próximos pasos</label><textarea id="txtRecom" style="min-height:110px;"></textarea></div>
+        <div class="acciones" style="margin-bottom:0;">
+          <button class="btn-primario" onclick="descargarPDF()">Generar PDF (Imprimir → Guardar como PDF)</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</div>
+
+<div id="reporteImprimible" style="position:absolute;left:-9999px;top:0;width:760px;background:#fff;z-index:-1;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+/* =====================================================================
+   CONEXIÓN
+   ===================================================================== */
+const SUPABASE_URL = "https://okgfgkegeurtssyrgbxk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_wjouGgMgxC0-C7_o7xPpbA_sqxmp7o9";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+/* =====================================================================
+   METADATOS DE PUNTUACIÓN
+   ===================================================================== */
+// Clima (IMCOC): dimensión -> ítems numerados (contextuales A-I excluidos)
+const CLIMA_DIMS = [
+  ["Objetivos",[1,2,3]],
+  ["Cooperación",[4,5,6,7,8,9,10,11,12,13]],
+  ["Liderazgo",[14,15,16,17,18,19,20,21,22]],
+  ["Toma de decisiones",[23,24,25,26]],
+  ["Relaciones interpersonales",[27,28,29,30,31,32]],
+  ["Motivación",[33,34,35,36,37,38]],
+  ["Control",[39,40,41,42,43]],
+];
+// Contextuales presentables (sin los de alerta E,F,G,I ni el 16)
+const CLIMA_CTX_PRES = [["A","Claridad sobre cómo se calcula el pago"],["B","Conocimiento de las normas de las plataformas"],
+  ["C","Apoyo mutuo frente a competencia en el equipo"],["D","Espacios de descanso y encuentro"],["H","Reconocimiento más allá de lo económico"]];
+
+// Bienestar (qBLG): escalas
+const MADUREZ = [["p1","Incorporación"],["p2","Gestión del desempeño y feedback"],["p3","Registro y análisis de la rotación"],
+  ["p4","Desvinculación"],["p5","Análisis de datos de personas"],["p6","Gestión algorítmica (contexto)"],
+  ["p7","Desarrollo de habilidades"],["p8","Transparencia retributiva"]];
+const NIV={inex:"Inexistente",info:"Informal",estr:"Estructurado"};
+const NIVCSS={inex:"des",info:"neu",estr:"fav"};
+
+/* =====================================================================
+   FUNCIONES DE PUNTUACIÓN
+   ===================================================================== */
+function prom(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+function clasifDim(p){return p>=5.5?["FORTALEZA","fav"]:p>=4.0?["ATENCIÓN","neu"]:["CRÍTICA","des"];}
+function clasif10(p){return p>=7?["FAVORABLE","fav"]:p>=4?["NEUTRO","neu"]:["DESFAVORABLE","des"];}
+function clasifExp(p){return p>40?["DESFAVORABLE","des"]:p>=20?["NEUTRO","neu"]:["FAVORABLE","fav"];}
+function clasif5(p){return p<=1.9?["FAVORABLE","fav"]:p<=3.0?["MODERADO","neu"]:["DESFAVORABLE","des"];}
+
+// Clima: promedio por dimensión de UNA respuesta (ítems respondidos)
+function climaDimsDe(items){
+  return CLIMA_DIMS.map(([,ids])=>{
+    const vals=ids.map(i=>items[i]).filter(v=>v!==null&&v!==undefined).map(Number);
+    return vals.length?prom(vals):null;
+  });
+}
+// Bienestar: indicadores de UNA respuesta
+function bienDe(items){
+  const r=(d,h)=>{let s=0,n=0;for(let i=d;i<=h;i++){if(items[i]!==null&&items[i]!==undefined){s+=Number(items[i]);n++;}}return n?s/n:null;};
+  let baja=0,tot=0;for(let i=21;i<=42;i++){if(items[i]!==undefined&&items[i]!==null){tot++;if(items[i]==="baja")baja++;}}
+  return {afectos:r(1,10),compet:r(11,20),pctBaja:tot?(baja/tot)*100:null,somat:r(43,47),desg:r(48,51),alien:r(52,55)};
+}
+
+/* =====================================================================
+   LOGIN
+   ===================================================================== */
+async function login(){
+  const email=document.getElementById("email").value.trim();
+  const pass=document.getElementById("pass").value;
+  const aviso=document.getElementById("avisoLogin");
+  const btn=document.getElementById("btnLogin");
+  btn.disabled=true;btn.textContent="Entrando…";
+  const { error } = await db.auth.signInWithPassword({ email, password:pass });
+  btn.disabled=false;btn.textContent="Entrar";
+  if(error){aviso.className="aviso err";aviso.textContent="No se pudo iniciar sesión: "+error.message;return;}
+  aviso.style.display="none";
+  mostrar("pantallaApp");
+  cargarEstudios();
+}
+async function logout(){ await db.auth.signOut(); location.reload(); }
+
+/* =====================================================================
+   CARGAR LISTA DE ESTUDIOS (códigos presentes en cualquiera de las 3 fuentes)
+   ===================================================================== */
+async function cargarEstudios(){
+  const sel=document.getElementById("selEstudio");
+  const set=new Set();
+  for(const tabla of ["auditoria_madurez","respuestas_clima","respuestas"]){
+    const { data } = await db.from(tabla).select("estudio");
+    (data||[]).forEach(r=>{ if(r.estudio) set.add(r.estudio); });
+  }
+  const arr=[...set].sort();
+  if(arr.length===0){sel.innerHTML='<option value="">No hay estudios con datos aún</option>';return;}
+  sel.innerHTML='<option value="">Selecciona…</option>'+arr.map(c=>`<option value="${c}">${c}</option>`).join("");
+}
+
+/* =====================================================================
+   GENERAR INFORME
+   ===================================================================== */
+let DATA=null;
+async function generar(){
+  const cod=document.getElementById("selEstudio").value;
+  const aviso=document.getElementById("avisoGen");
+  if(!cod){aviso.className="aviso err";aviso.textContent="Elige un estudio.";return;}
+  aviso.style.display="none";
+  const btn=document.getElementById("btnGenerar");btn.disabled=true;btn.textContent="Generando…";
+
+  // Traer las tres fuentes para este código
+  const aud = (await db.from("auditoria_madurez").select("*").eq("estudio",cod).order("created_at",{ascending:false})).data||[];
+  const cli = (await db.from("respuestas_clima").select("*").eq("estudio",cod)).data||[];
+  const bie = (await db.from("respuestas").select("*").eq("estudio",cod)).data||[];
+  btn.disabled=false;btn.textContent="Generar informe";
+
+  DATA={cod, auditoria:aud[0]||null, climaN:cli.length, bienN:bie.length};
+
+  // ---- Agregado de clima (n>=5) ----
+  if(cli.length>=5){
+    DATA.clima = CLIMA_DIMS.map(([nombre],idx)=>{
+      const vals=cli.map(r=>climaDimsDe(r.items)[idx]).filter(v=>v!==null);
+      const p=prom(vals);return {nombre,prom:p,clasif:clasifDim(p)};
+    });
+    DATA.climaGlobal = prom(cli.map(r=>{const d=climaDimsDe(r.items).filter(v=>v!==null);return d.length?prom(d):null;}).filter(v=>v!==null));
+    DATA.climaCtx = CLIMA_CTX_PRES.map(([id,label])=>{
+      const vals=cli.map(r=>r.items[id]).filter(v=>v!==null&&v!==undefined).map(Number);
+      return {label,prom:vals.length?prom(vals):null};
+    });
+  }
+  // ---- Agregado de bienestar (n>=5) ----
+  if(bie.length>=5){
+    const all=bie.map(r=>bienDe(r.items));
+    const avg=k=>prom(all.map(x=>x[k]).filter(v=>v!==null));
+    DATA.bien = {
+      afectos:avg("afectos"), compet:avg("compet"), pctBaja:avg("pctBaja"),
+      somat:avg("somat"), desg:avg("desg"), alien:avg("alien")
+    };
+  }
+
+  renderPrevia();
+  generarBorradores();
+  document.getElementById("resultado").style.display="block";
+  window.scrollTo(0,document.getElementById("resultado").offsetTop);
+}
+
+function renderPrevia(){
+  let html="";
+  // Madurez
+  html+=`<div class="fuente">Madurez de gestión (Pista C)</div>`;
+  if(DATA.auditoria){
+    let filas=MADUREZ.map(([id,nom])=>{
+      const nv=DATA.auditoria.niveles[id];
+      const prio=(DATA.auditoria.prioridades&&DATA.auditoria.prioridades.includes(id))?" ★":"";
+      return `<tr><td>${nom}${prio}</td><td><span class="tag ${nv?NIVCSS[nv]:''}">${nv?NIV[nv]:"—"}</span></td></tr>`;
+    }).join("");
+    html+=`<div class="scroll-x"><table class="res"><tbody>${filas}</tbody></table></div><p class="muted">★ = prioridad de la hoja de ruta.</p>`;
+  } else { html+=`<p class="muted">Sin auditoría registrada para este estudio.</p>`; }
+
+  // Clima
+  html+=`<div class="fuente" style="margin-top:14px;">Clima organizacional (Pista A) — ${DATA.climaN} respuesta(s)</div>`;
+  if(DATA.clima){
+    let filas=DATA.clima.map(d=>`<tr><td>${d.nombre}</td><td>${d.prom.toFixed(2)}/7</td><td><span class="tag ${d.clasif[1]}">${d.clasif[0]}</span></td></tr>`).join("");
+    filas+=`<tr style="font-weight:700;background:#f3f6fa;"><td>GLOBAL</td><td>${DATA.climaGlobal.toFixed(2)}/7</td><td><span class="tag ${clasifDim(DATA.climaGlobal)[1]}">${clasifDim(DATA.climaGlobal)[0]}</span></td></tr>`;
+    html+=`<div class="scroll-x"><table class="res"><tbody>${filas}</tbody></table></div>`;
+  } else { html+=`<p class="muted">Datos insuficientes (se requieren 5+ respuestas).</p>`; }
+
+  // Bienestar
+  html+=`<div class="fuente" style="margin-top:14px;">Bienestar laboral (Pista B) — ${DATA.bienN} respuesta(s)</div>`;
+  if(DATA.bien){
+    const b=DATA.bien;
+    const fila=(n,v,cl)=>`<tr><td>${n}</td><td>${v}</td><td><span class="tag ${cl[1]}">${cl[0]}</span></td></tr>`;
+    html+=`<div class="scroll-x"><table class="res"><tbody>
+      ${fila("Afectos",b.afectos.toFixed(2)+"/10",clasif10(b.afectos))}
+      ${fila("Competencias",b.compet.toFixed(2)+"/10",clasif10(b.compet))}
+      ${fila("Expectativas",b.pctBaja.toFixed(0)+"% ↓",clasifExp(b.pctBaja))}
+      ${fila("Somatización",b.somat.toFixed(2)+"/5",clasif5(b.somat))}
+      ${fila("Desgaste",b.desg.toFixed(2)+"/5",clasif5(b.desg))}
+      ${fila("Alienación",b.alien.toFixed(2)+"/5",clasif5(b.alien))}
+    </tbody></table></div>`;
+  } else { html+=`<p class="muted">Datos insuficientes (se requieren 5+ respuestas).</p>`; }
+
+  document.getElementById("previa").innerHTML=html;
+}
+
+/* =====================================================================
+   BORRADORES AUTOMÁTICOS
+   ===================================================================== */
+function generarBorradores(){
+  document.getElementById("txtNombre").value = DATA.cod;
+
+  // Resumen ejecutivo
+  let res=`Informe de diagnóstico organizacional del estudio. `;
+  if(DATA.auditoria) res+=`Se levantó la Auditoría de Madurez HR con la dirección. `;
+  res+=`Participaron ${DATA.bienN} persona(s) en el diagnóstico de bienestar y ${DATA.climaN} en el de clima. `;
+  if(DATA.clima) res+=`El clima general se ubica en nivel ${clasifDim(DATA.climaGlobal)[0]} (${DATA.climaGlobal.toFixed(1)}/7). `;
+  document.getElementById("txtResumen").value=res;
+
+  // Madurez
+  if(DATA.auditoria){
+    const gaps=MADUREZ.filter(([id])=>{const nv=DATA.auditoria.niveles[id];return nv==="inex"||nv==="info";}).map(([,n])=>n);
+    const fort=MADUREZ.filter(([id])=>DATA.auditoria.niveles[id]==="estr").map(([,n])=>n);
+    let t="";
+    if(fort.length) t+=`Procesos consolidados (Estructurado): ${fort.join(", ")}. `;
+    if(gaps.length) t+=`Procesos con vacíos (Inexistente o Informal): ${gaps.join(", ")}. `;
+    if(DATA.auditoria.narrativa) t+=`\n\n${DATA.auditoria.narrativa}`;
+    document.getElementById("txtMadurez").value=t.trim();
+  } else { document.getElementById("txtMadurez").value="(Sin auditoría registrada para este estudio.)"; }
+
+  // Clima
+  if(DATA.clima){
+    const ord=[...DATA.clima].sort((a,b)=>b.prom-a.prom);
+    const fort=ord.filter(d=>d.clasif[0]==="FORTALEZA").map(d=>d.nombre);
+    const crit=ord.filter(d=>d.clasif[0]==="CRÍTICA").map(d=>d.nombre);
+    const aten=ord.filter(d=>d.clasif[0]==="ATENCIÓN").map(d=>d.nombre);
+    let t=`Clima general ${clasifDim(DATA.climaGlobal)[0]} (${DATA.climaGlobal.toFixed(1)}/7). `;
+    if(fort.length) t+=`Fortalezas: ${fort.join(", ")}. `;
+    if(aten.length) t+=`En zona de atención: ${aten.join(", ")}. `;
+    if(crit.length) t+=`Críticas (prioridad): ${crit.join(", ")}. `;
+    document.getElementById("txtClima").value=t;
+  } else { document.getElementById("txtClima").value="(Datos de clima insuficientes para reporte agregado.)"; }
+
+  // Bienestar
+  if(DATA.bien){
+    const b=DATA.bien;
+    const escalas=[["Afectos",clasif10(b.afectos)],["Competencias",clasif10(b.compet)],["Expectativas",clasifExp(b.pctBaja)],
+      ["Somatización",clasif5(b.somat)],["Desgaste",clasif5(b.desg)],["Alienación",clasif5(b.alien)]];
+    const fav=escalas.filter(e=>e[1][0]==="FAVORABLE").map(e=>e[0]);
+    const desf=escalas.filter(e=>e[1][0]==="DESFAVORABLE").map(e=>e[0]);
+    let t="";
+    if(fav.length) t+=`Escalas favorables: ${fav.join(", ")}. `;
+    if(desf.length) t+=`Escalas desfavorables (atención): ${desf.join(", ")}. `;
+    if(!fav.length&&!desf.length) t="Las escalas de bienestar se ubican en rangos intermedios.";
+    document.getElementById("txtBienestar").value=t;
+  } else { document.getElementById("txtBienestar").value="(Datos de bienestar insuficientes para reporte agregado.)"; }
+
+  // Lectura integrada (juxtaposición conservadora, NO causal)
+  let señales=[];
+  if(DATA.auditoria){
+    const gaps=MADUREZ.filter(([id])=>{const nv=DATA.auditoria.niveles[id];return nv==="inex"||nv==="info";}).map(([,n])=>n);
+    if(gaps.length) señales.push(`en la gestión de personas hay vacíos en: ${gaps.join(", ")}`);
+  }
+  if(DATA.clima){
+    const crit=DATA.clima.filter(d=>d.clasif[0]!=="FORTALEZA").map(d=>d.nombre);
+    if(crit.length) señales.push(`en el clima requieren atención: ${crit.join(", ")}`);
+  }
+  if(DATA.bien){
+    const b=DATA.bien;
+    const desf=[["Afectos",clasif10(b.afectos)],["Competencias",clasif10(b.compet)],["Expectativas",clasifExp(b.pctBaja)],
+      ["Somatización",clasif5(b.somat)],["Desgaste",clasif5(b.desg)],["Alienación",clasif5(b.alien)]]
+      .filter(e=>e[1][0]==="DESFAVORABLE").map(e=>e[0]);
+    if(desf.length) señales.push(`en el bienestar destacan: ${desf.join(", ")}`);
+  }
+  let integ="";
+  if(señales.length>=2){
+    integ=`Las tres fuentes apuntan a leer estos hallazgos en conjunto: ${señales.join("; ")}. Cuando la lectura del sistema de gestión (madurez) y la lectura de la experiencia de las personas (clima y bienestar) coinciden en una misma área, ese punto de convergencia es la prioridad más sólida del diagnóstico. [Desarrolla aquí la interpretación específica del estudio.]`;
+  } else if(señales.length===1){
+    integ=`Señal a observar: ${señales[0]}. [Completa la lectura integrada cuando haya datos de las tres fuentes.]`;
+  } else {
+    integ="[Aún no hay señales convergentes claras, o falta completar alguna fuente. Desarrolla la lectura integrada con tu criterio.]";
+  }
+  document.getElementById("txtIntegrada").value=integ;
+
+  // Recomendaciones
+  let recs=[];
+  if(DATA.auditoria&&DATA.auditoria.prioridades){
+    DATA.auditoria.prioridades.forEach(id=>{const m=MADUREZ.find(x=>x[0]===id);if(m)recs.push(`Gestión: intervenir el proceso de ${m[1]}.`);});
+  }
+  if(DATA.clima){DATA.clima.filter(d=>d.clasif[0]==="CRÍTICA").forEach(d=>recs.push(`Clima: trabajo prioritario en ${d.nombre}.`));}
+  let t = recs.length ? "Prioridades sugeridas:\n"+recs.map((r,i)=>`${i+1}. ${r}`).join("\n") : "Sostener las prácticas actuales y repetir la medición en 6–12 meses.";
+  document.getElementById("txtRecom").value=t;
+}
+
+/* =====================================================================
+   PDF
+   ===================================================================== */
+function barra(p,max,css){const pct=Math.round((p/max)*100);const c=css==="fav"?"#2f855a":css==="neu"?"#b7791f":"#c53030";
+  return `<div style="background:#eee;border-radius:6px;height:16px;width:100%;"><div style="width:${pct}%;background:${c};height:16px;border-radius:6px;"></div></div>`;}
+
+function descargarPDF(){
+  if(!DATA){return;}
+  const nombre=document.getElementById("txtNombre").value.trim()||DATA.cod;
+  const hoy=new Date().toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
+  const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,"<br>");
+  const H=(t)=>`<h2 style="font-size:15px;color:#2c5282;margin:20px 0 6px;">${t}</h2>`;
+  const P=(t)=>`<p style="font-size:12.5px;line-height:1.6;margin:0 0 6px;">${esc(t)}</p>`;
+
+  // Tabla madurez
+  let madTabla="";
+  if(DATA.auditoria){
+    madTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>`+
+      MADUREZ.map(([id,nom])=>{const nv=DATA.auditoria.niveles[id];const c=nv==="estr"?"#2f855a":nv==="info"?"#b7791f":"#c53030";
+        const prio=(DATA.auditoria.prioridades&&DATA.auditoria.prioridades.includes(id))?" ★":"";
+        return `<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${nom}${prio}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${c};">${nv?NIV[nv]:"—"}</td></tr>`;}).join("")+`</tbody></table>`;
+  }
+  // Tabla clima
+  let cliTabla="";
+  if(DATA.clima){
+    cliTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>`+
+      DATA.clima.map(d=>`<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${d.nombre}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #eee;width:140px;">${barra(d.prom,7,d.clasif[1])}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:center;">${d.prom.toFixed(1)}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${d.clasif[1]==='fav'?'#2f855a':d.clasif[1]==='neu'?'#b7791f':'#c53030'};">${d.clasif[0]}</td></tr>`).join("")+
+      `<tr><td style="padding:5px 8px;font-weight:700;">GLOBAL</td><td></td><td style="text-align:center;font-weight:700;">${DATA.climaGlobal.toFixed(1)}</td><td style="font-weight:700;">${clasifDim(DATA.climaGlobal)[0]}</td></tr></tbody></table>`;
+  }
+  // Tabla bienestar
+  let bieTabla="";
+  if(DATA.bien){
+    const b=DATA.bien;
+    const row=(n,v,cl)=>`<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${n}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">${v}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${cl[1]==='fav'?'#2f855a':cl[1]==='neu'?'#b7791f':'#c53030'};">${cl[0]}</td></tr>`;
+    bieTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>
+      ${row("Afectos",b.afectos.toFixed(1)+"/10",clasif10(b.afectos))}
+      ${row("Competencias",b.compet.toFixed(1)+"/10",clasif10(b.compet))}
+      ${row("Expectativas",b.pctBaja.toFixed(0)+"% en descenso",clasifExp(b.pctBaja))}
+      ${row("Somatización",b.somat.toFixed(1)+"/5",clasif5(b.somat))}
+      ${row("Desgaste",b.desg.toFixed(1)+"/5",clasif5(b.desg))}
+      ${row("Alienación",b.alien.toFixed(1)+"/5",clasif5(b.alien))}
+    </tbody></table>`;
+  }
+
+  const html=`<div style="font-family:Arial,Helvetica,sans-serif;color:#1f2933;padding:40px;">
+    <div style="border-bottom:3px solid #2c5282;padding-bottom:16px;margin-bottom:18px;">
+      <div style="font-size:13px;letter-spacing:2px;color:#2c5282;font-weight:700;">KÓR CONSULTING</div>
+      <h1 style="font-size:21px;margin:8px 0 4px;">Informe de Diagnóstico Organizacional</h1>
+      <div style="color:#52606d;font-size:13px;">${esc(nombre)} · ${hoy}</div>
+    </div>
+    <p style="font-size:11.5px;color:#52606d;background:#f0f4f9;padding:10px 12px;border-radius:6px;">Informe <b>agregado y anónimo</b>. No contiene respuestas individuales ni textos abiertos. Los resultados reflejan percepciones y son orientativos, no diagnósticos clínicos. Base: ${DATA.climaN} respuesta(s) de clima, ${DATA.bienN} de bienestar.</p>
+
+    ${H("Resumen ejecutivo")}${P(document.getElementById("txtResumen").value)}
+
+    ${H("1. Madurez de la gestión de personas")}${madTabla}${P(document.getElementById("txtMadurez").value)}
+
+    ${H("2. Clima organizacional")}${cliTabla}${P(document.getElementById("txtClima").value)}
+
+    ${H("3. Bienestar laboral")}${bieTabla}${P(document.getElementById("txtBienestar").value)}
+
+    ${H("4. Lectura integrada")}${P(document.getElementById("txtIntegrada").value)}
+
+    ${H("5. Recomendaciones y próximos pasos")}${P(document.getElementById("txtRecom").value)}
+
+    <p style="font-size:10.5px;color:#8a9099;margin-top:26px;border-top:1px solid #e3e3e3;padding-top:10px;">Nota metodológica: diagnóstico basado en tres instrumentos (madurez de gestión, clima organizacional y bienestar laboral). Escalas orientativas; sin puntos de corte clínicos. Reporte agregado: requiere mínimo 5 respuestas por instrumento para proteger el anonimato. Elaborado por KÓR Consulting.</p>
+  </div>`;
+
+  const cont=document.getElementById("reporteImprimible");
+  cont.innerHTML=html;
+  // Impresión nativa del navegador (Imprimir → Guardar como PDF).
+  // Ruta robusta: no depende de ninguna librería de captura.
+  const tituloPrev=document.title;
+  document.title=`Informe_${nombre.replace(/[^a-z0-9]/gi,'_')}`;
+  window.print();
+  setTimeout(function(){ document.title=tituloPrev; }, 800);
+}
+
+function mostrar(id){document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa"));document.getElementById(id).classList.add("activa");}
+</script>
+</body>
+</html>
