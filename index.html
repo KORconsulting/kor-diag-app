@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>KÓR · Diagnóstico organizacional</title>
+<style>
+  :root{
+    --negro:#2D2926;
+    --azul:#5B83B0;       /* KÓR — Pantone 7451 aprox */
+    --azul-oscuro:#3E5E84;
+    --oro:#C5A95E;        /* Pantone 461 aprox */
+    --crema:#F5EFDE;      /* Pantone 9140 aprox */
+    --gris:#6B6660;
+    --linea:#E3DCC9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:var(--crema);
+    color:var(--negro);
+    line-height:1.5;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 18px;
+  }
+  .wrap{width:100%;max-width:680px}
+  header{text-align:center;margin-bottom:40px}
+  .marca{
+    font-size:46px;
+    font-weight:300;
+    letter-spacing:14px;
+    color:var(--negro);
+    padding-left:14px; /* compensa el tracking a la derecha */
+  }
+  .marca b{font-weight:600}
+  .sub{
+    margin-top:10px;
+    font-size:13px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--gris);
+  }
+  .barra{
+    width:48px;height:3px;background:var(--oro);
+    margin:18px auto 0;border-radius:2px;
+  }
+  .grupo{margin-bottom:30px}
+  .grupo-tit{
+    font-size:12px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--azul-oscuro);
+    font-weight:600;
+    margin-bottom:12px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--linea);
+  }
+  .acceso{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    background:#fff;
+    border:1px solid var(--linea);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:12px;
+    text-decoration:none;
+    color:inherit;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .acceso:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 18px rgba(45,41,38,.10);
+    border-color:var(--azul);
+  }
+  .acceso .txt h3{font-size:17px;font-weight:600;margin-bottom:2px}
+  .acceso .txt p{font-size:13px;color:var(--gris)}
+  .pista{
+    flex-shrink:0;
+    width:38px;height:38px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:15px;color:#fff;
+    background:var(--azul);
+  }
+  .pista.oro{background:var(--oro)}
+  .pista.neg{background:var(--negro)}
+  .flecha{color:var(--azul);font-size:20px;flex-shrink:0}
+  .nota-login{
+    font-size:12px;color:var(--gris);
+    margin-top:2px;display:inline-block;
+  }
+  footer{
+    text-align:center;margin-top:34px;
+    font-size:12px;color:var(--gris);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="marca">K<b>O</b>R</div>
+      <div class="sub">Diagnóstico organizacional</div>
+      <div class="barra"></div>
+    </header>
+
+    <section class="grupo">
+      <div class="grupo-tit">Aplicación con la modelo</div>
+
+      <a class="acceso" href="qBLG-W_formulario_v1.html">
+        <span class="pista">B</span>
+        <span class="txt">
+          <h3>Bienestar laboral</h3>
+          <p>Cuestionario qBLG-W · 55 ítems</p>
+        </span>
+        <span class="flecha">→</span>
+      </a>
+
+      <a class="acceso" href="IMCOC_formulario_v1.html">
+        <span class="pista">A</span>
+        <span class="txt">
+          <h3>Clima organizacional</h3>
+          <p>IMCOC · 7 dimensiones</p>
+        </span>
+        <span class="flecha">→</span>
+      </a>
+    </section>
+
+    <section class="grupo">
+      <div class="grupo-tit">Uso del consultor · requiere iniciar sesión</div>
+
+      <a class="acceso" href="AuditoriaMadurezHR_v1.html">
+        <span class="pista oro">C</span>
+        <span class="txt">
+          <h3>Auditoría de Madurez HR</h3>
+          <p>8 procesos × 3 niveles <span class="nota-login">· con sesión</span></p>
+        </span>
+        <span class="flecha">→</span>
+      </a>
+
+      <a class="acceso" href="InformeIntegrado_v1.html">
+        <span class="pista neg">∑</span>
+        <span class="txt">
+          <h3>Informe integrado</h3>
+          <p>Cruce de las tres fuentes <span class="nota-login">· con sesión</span></p>
+        </span>
+        <span class="flecha">→</span>
+      </a>
+    </section>
+
+    <footer>KÓR Consulting · Acceso interno del diagnóstico</footer>
+  </div>
+</body>
+</html>
