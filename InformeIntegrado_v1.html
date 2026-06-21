@@ -123,6 +123,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
 /* =====================================================================
    CONEXIÓN
@@ -176,6 +178,125 @@ function bienDe(items){
   const r=(d,h)=>{let s=0,n=0;for(let i=d;i<=h;i++){if(items[i]!==null&&items[i]!==undefined){s+=Number(items[i]);n++;}}return n?s/n:null;};
   let baja=0,tot=0;for(let i=21;i<=42;i++){if(items[i]!==undefined&&items[i]!==null){tot++;if(items[i]==="baja")baja++;}}
   return {afectos:r(1,10),compet:r(11,20),pctBaja:tot?(baja/tot)*100:null,somat:r(43,47),desg:r(48,51),alien:r(52,55)};
+}
+
+/* =====================================================================
+   PALETA KOR + GRAFICAS (Chart.js) PARA EL PDF DEL DUEÑO
+   ===================================================================== */
+const KOR = {
+  negro:"#2D2926", azul:"#5B83B0", azulOsc:"#3E5E84", oro:"#C5A95E",
+  crema:"#F5EFDE", linea:"#E3DCC9", gris:"#6B6660", terracota:"#B5793C"
+};
+// Banda de color segun clasificacion (favorable / neutro / desfavorable)
+function colorClasif(css){ return css==="fav"?KOR.azul : css==="neu"?KOR.oro : KOR.terracota; }
+
+// Bienestar: convierte las 6 escalas a % comparables.
+// Recursos (afectos, competencias, expectativas) -> favorabilidad (derecha).
+// Malestar (somatizacion, desgaste, alienacion) -> severidad (izquierda).
+// "Sin invertir valencia": cada barra crece en su direccion real.
+function favBienestar(b){
+  const out=[];
+  if(b.afectos!=null) out.push({label:"Afectos positivos", side:"rec", pct:b.afectos/10*100, real:b.afectos.toFixed(1)+"/10", cl:clasif10(b.afectos)[1]});
+  if(b.compet!=null)  out.push({label:"Competencias",      side:"rec", pct:b.compet/10*100,  real:b.compet.toFixed(1)+"/10",  cl:clasif10(b.compet)[1]});
+  if(b.pctBaja!=null) out.push({label:"Expectativas",      side:"rec", pct:100-b.pctBaja,     real:(100-b.pctBaja).toFixed(0)+"% fav.", cl:clasifExp(b.pctBaja)[1]});
+  if(b.somat!=null)   out.push({label:"Somatización",      side:"mal", pct:b.somat/5*100,     real:b.somat.toFixed(1)+"/5",   cl:clasif5(b.somat)[1]});
+  if(b.desg!=null)    out.push({label:"Desgaste",          side:"mal", pct:b.desg/5*100,      real:b.desg.toFixed(1)+"/5",    cl:clasif5(b.desg)[1]});
+  if(b.alien!=null)   out.push({label:"Alienación",        side:"mal", pct:b.alien/5*100,     real:b.alien.toFixed(1)+"/5",   cl:clasif5(b.alien)[1]});
+  return out;
+}
+// Indice global de bienestar (0-100): recursos como favorabilidad, malestar invertido a "salud".
+function bienestarGlobalFav(b){
+  const v=[];
+  if(b.afectos!=null) v.push(b.afectos/10*100);
+  if(b.compet!=null)  v.push(b.compet/10*100);
+  if(b.pctBaja!=null) v.push(100-b.pctBaja);
+  if(b.somat!=null)   v.push(100-b.somat/5*100);
+  if(b.desg!=null)    v.push(100-b.desg/5*100);
+  if(b.alien!=null)   v.push(100-b.alien/5*100);
+  return v.length? v.reduce((a,c)=>a+c,0)/v.length : null;
+}
+
+// ---- Tarjetas KPI (HTML, van al PDF) ----
+function htmlTarjetas(){
+  const card=(titulo,valor,sub,color)=>`<div style="flex:1 1 0;min-width:120px;border:1px solid ${KOR.linea};border-radius:10px;padding:12px 14px;background:#fff;">
+      <div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:${KOR.gris};margin-bottom:4px;">${titulo}</div>
+      <div style="font-size:22px;font-weight:700;color:${color||KOR.negro};line-height:1.1;">${valor}</div>
+      <div style="font-size:10.5px;color:${KOR.gris};margin-top:2px;">${sub||""}</div>
+    </div>`;
+  let cards=[];
+  cards.push(card("Participación", `${DATA.climaN}·${DATA.bienN}`, "respuestas clima · bienestar"));
+  if(DATA.clima){ const cl=clasifDim(DATA.climaGlobal); cards.push(card("Clima global", DATA.climaGlobal.toFixed(1)+"/7", cl[0], colorClasif(cl[1]))); }
+  if(DATA.bien){
+    const fav=bienestarGlobalFav(DATA.bien);
+    const cl = fav>=65?"fav":fav>=40?"neu":"des";
+    cards.push(card("Bienestar global", Math.round(fav)+"%", "índice de favorabilidad", colorClasif(cl)));
+    const recs=favBienestar(DATA.bien).filter(x=>x.side==="rec"); const recProm=recs.length?recs.reduce((a,c)=>a+c.pct,0)/recs.length:0;
+    cards.push(card("Recursos psicosociales", Math.round(recProm)+"%", "afectos · competencias · expectativas", KOR.azul));
+  }
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 4px;">${cards.join("")}</div>`;
+}
+
+// ---- Termometro (HTML/CSS, imprime sin depender de canvas) ----
+// pct = posicion del valor (0-100); b1,b2 = limites de banda des|neu y neu|fav.
+function htmlTermometro(titulo, pct, valorTexto, etiqueta, b1, b2){
+  pct=Math.max(0,Math.min(100,pct));
+  return `<div style="flex:1 1 0;min-width:200px;">
+    <div style="font-size:11px;color:${KOR.gris};margin-bottom:6px;font-weight:600;">${titulo}</div>
+    <div style="position:relative;height:16px;border-radius:8px;overflow:hidden;border:1px solid ${KOR.linea};
+      background:linear-gradient(to right,${KOR.terracota} 0,${KOR.terracota} ${b1}%,${KOR.oro} ${b1}%,${KOR.oro} ${b2}%,${KOR.azul} ${b2}%,${KOR.azul} 100%);"></div>
+    <div style="position:relative;height:12px;">
+      <div style="position:absolute;left:${pct}%;transform:translateX(-50%);font-size:12px;color:${KOR.negro};line-height:1;">▲</div>
+    </div>
+    <div style="font-size:16px;font-weight:700;color:${KOR.negro};">${valorTexto} <span style="font-size:11px;font-weight:600;color:${KOR.gris};">${etiqueta||""}</span></div>
+  </div>`;
+}
+
+// ---- Render de los 2 graficos Chart.js sobre los canvas ya insertados ----
+let _charts=[];
+function pintarGraficas(){
+  _charts.forEach(c=>{try{c.destroy();}catch(e){}}); _charts=[];
+  if(window.ChartDataLabels){ Chart.register(window.ChartDataLabels); }
+  Chart.defaults.font.family = "'Segoe UI',system-ui,-apple-system,sans-serif";
+  Chart.defaults.devicePixelRatio = 2;
+
+  // Radar de clima
+  const cR=document.getElementById("cnvRadar");
+  if(cR && DATA.clima){
+    _charts.push(new Chart(cR, {
+      type:"radar",
+      data:{ labels:DATA.clima.map(d=>d.nombre),
+        datasets:[{ data:DATA.clima.map(d=>+d.prom.toFixed(2)),
+          fill:true, backgroundColor:"rgba(91,131,176,0.22)", borderColor:KOR.azulOsc,
+          borderWidth:2, pointBackgroundColor:KOR.azulOsc, pointRadius:3 }]},
+      options:{ animation:false, responsive:false,
+        scales:{ r:{ min:0, max:7, ticks:{stepSize:1, backdropColor:"transparent", color:KOR.gris, font:{size:9}},
+          grid:{color:KOR.linea}, angleLines:{color:KOR.linea}, pointLabels:{color:KOR.negro, font:{size:10}} }},
+        plugins:{ legend:{display:false},
+          datalabels:{ color:KOR.azulOsc, font:{size:10,weight:"bold"},
+            anchor:"end", align:"end", formatter:v=>v.toFixed(1) } } }
+    }));
+  }
+
+  // Barra divergente de bienestar
+  const cB=document.getElementById("cnvDiverg");
+  if(cB && DATA.bien){
+    const items=favBienestar(DATA.bien);
+    _charts.push(new Chart(cB, {
+      type:"bar",
+      data:{ labels:items.map(x=>x.label),
+        datasets:[{ data:items.map(x=> x.side==="rec"? x.pct : -x.pct ),
+          backgroundColor:items.map(x=> x.side==="rec"? KOR.azul : KOR.terracota ),
+          borderWidth:0, barPercentage:0.78 }]},
+      options:{ indexAxis:"y", animation:false, responsive:false,
+        scales:{ x:{ min:-100, max:100, grid:{color:KOR.linea},
+            ticks:{ color:KOR.gris, font:{size:9}, callback:v=>Math.abs(v)+"%" } },
+          y:{ grid:{display:false}, ticks:{ color:KOR.negro, font:{size:10} } } },
+        plugins:{ legend:{display:false},
+          datalabels:{ color:KOR.negro, font:{size:9.5,weight:"bold"},
+            anchor:"end", align:(ctx)=> items[ctx.dataIndex].side==="rec"? "end":"start",
+            formatter:(v,ctx)=> items[ctx.dataIndex].real } } }
+    }));
+  }
 }
 
 /* =====================================================================
@@ -396,73 +517,74 @@ function descargarPDF(){
   const nombre=document.getElementById("txtNombre").value.trim()||DATA.cod;
   const hoy=new Date().toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
   const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,"<br>");
-  const H=(t)=>`<h2 style="font-size:15px;color:#2c5282;margin:20px 0 6px;">${t}</h2>`;
+  const H=(t)=>`<h2 style="font-size:15px;color:${KOR.azulOsc};margin:22px 0 8px;">${t}</h2>`;
   const P=(t)=>`<p style="font-size:12.5px;line-height:1.6;margin:0 0 6px;">${esc(t)}</p>`;
 
-  // Tabla madurez
+  // Madurez: se mantiene como tabla compacta (no tiene grafica asignada;
+  // es el perfil propio del dueño).
   let madTabla="";
   if(DATA.auditoria){
     madTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>`+
-      MADUREZ.map(([id,nom])=>{const nv=DATA.auditoria.niveles[id];const c=nv==="estr"?"#2f855a":nv==="info"?"#b7791f":"#c53030";
+      MADUREZ.map(([id,nom])=>{const nv=DATA.auditoria.niveles[id];const c=nv==="estr"?KOR.azul:nv==="info"?KOR.oro:KOR.terracota;
         const prio=(DATA.auditoria.prioridades&&DATA.auditoria.prioridades.includes(id))?" ★":"";
-        return `<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${nom}${prio}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${c};">${nv?NIV[nv]:"—"}</td></tr>`;}).join("")+`</tbody></table>`;
-  }
-  // Tabla clima
-  let cliTabla="";
-  if(DATA.clima){
-    cliTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>`+
-      DATA.clima.map(d=>`<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${d.nombre}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid #eee;width:140px;">${barra(d.prom,7,d.clasif[1])}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:center;">${d.prom.toFixed(1)}</td>
-        <td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${d.clasif[1]==='fav'?'#2f855a':d.clasif[1]==='neu'?'#b7791f':'#c53030'};">${d.clasif[0]}</td></tr>`).join("")+
-      `<tr><td style="padding:5px 8px;font-weight:700;">GLOBAL</td><td></td><td style="text-align:center;font-weight:700;">${DATA.climaGlobal.toFixed(1)}</td><td style="font-weight:700;">${clasifDim(DATA.climaGlobal)[0]}</td></tr></tbody></table>`;
-  }
-  // Tabla bienestar
-  let bieTabla="";
-  if(DATA.bien){
-    const b=DATA.bien;
-    const row=(n,v,cl)=>`<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">${n}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;">${v}</td><td style="padding:5px 8px;border-bottom:1px solid #eee;font-weight:700;color:${cl[1]==='fav'?'#2f855a':cl[1]==='neu'?'#b7791f':'#c53030'};">${cl[0]}</td></tr>`;
-    bieTabla=`<table style="width:100%;border-collapse:collapse;font-size:11.5px;"><tbody>
-      ${row("Afectos",b.afectos.toFixed(1)+"/10",clasif10(b.afectos))}
-      ${row("Competencias",b.compet.toFixed(1)+"/10",clasif10(b.compet))}
-      ${row("Expectativas",b.pctBaja.toFixed(0)+"% en descenso",clasifExp(b.pctBaja))}
-      ${row("Somatización",b.somat.toFixed(1)+"/5",clasif5(b.somat))}
-      ${row("Desgaste",b.desg.toFixed(1)+"/5",clasif5(b.desg))}
-      ${row("Alienación",b.alien.toFixed(1)+"/5",clasif5(b.alien))}
-    </tbody></table>`;
-  }
+        return `<tr><td style="padding:5px 8px;border-bottom:1px solid ${KOR.linea};">${nom}${prio}</td><td style="padding:5px 8px;border-bottom:1px solid ${KOR.linea};font-weight:700;color:${c};">${nv?NIV[nv]:"—"}</td></tr>`;}).join("")+`</tbody></table>`;
+  } else { madTabla=`<p style="font-size:12px;color:${KOR.gris};">Sin auditoría registrada para este estudio.</p>`; }
 
-  const html=`<div style="font-family:Arial,Helvetica,sans-serif;color:#1f2933;padding:40px;">
-    <div style="border-bottom:3px solid #2c5282;padding-bottom:16px;margin-bottom:18px;">
-      <div style="font-size:13px;letter-spacing:2px;color:#2c5282;font-weight:700;">KÓR CONSULTING</div>
+  // Clima: radar + termometro
+  let cliBloque="";
+  if(DATA.clima){
+    const cl=clasifDim(DATA.climaGlobal);
+    const pct=(DATA.climaGlobal-1)/6*100;
+    cliBloque=`<div style="text-align:center;margin:6px 0 4px;"><canvas id="cnvRadar" width="380" height="340"></canvas></div>
+      <div style="display:flex;gap:18px;margin-top:6px;">${htmlTermometro("Clima global", pct, DATA.climaGlobal.toFixed(1)+"/7", cl[0], 50, 75)}</div>`;
+  } else { cliBloque=`<p style="font-size:12px;color:${KOR.gris};">Datos de clima insuficientes (se requieren 5+ respuestas).</p>`; }
+
+  // Bienestar: barra divergente + termometro
+  let bieBloque="";
+  if(DATA.bien){
+    const fav=bienestarGlobalFav(DATA.bien);
+    const clB = fav>=65?"FAVORABLE":fav>=40?"NEUTRO":"DESFAVORABLE";
+    bieBloque=`<div style="text-align:center;margin:6px 0 2px;"><canvas id="cnvDiverg" width="540" height="280"></canvas></div>
+      <div style="font-size:10px;color:${KOR.gris};text-align:center;margin-bottom:6px;">◀ malestar (somatización · desgaste · alienación) &nbsp;|&nbsp; recursos (afectos · competencias · expectativas) ▶</div>
+      <div style="display:flex;gap:18px;margin-top:4px;">${htmlTermometro("Bienestar global", fav, Math.round(fav)+"%", clB, 40, 65)}</div>`;
+  } else { bieBloque=`<p style="font-size:12px;color:${KOR.gris};">Datos de bienestar insuficientes (se requieren 5+ respuestas).</p>`; }
+
+  const html=`<div style="font-family:'Segoe UI',Arial,Helvetica,sans-serif;color:${KOR.negro};padding:40px;">
+    <div style="border-bottom:3px solid ${KOR.azulOsc};padding-bottom:16px;margin-bottom:18px;">
+      <div style="font-size:13px;letter-spacing:3px;color:${KOR.negro};font-weight:700;">K<span style="color:${KOR.oro};">Ó</span>R CONSULTING</div>
       <h1 style="font-size:21px;margin:8px 0 4px;">Informe de Diagnóstico Organizacional</h1>
-      <div style="color:#52606d;font-size:13px;">${esc(nombre)} · ${hoy}</div>
+      <div style="color:${KOR.gris};font-size:13px;">${esc(nombre)} · ${hoy}</div>
     </div>
-    <p style="font-size:11.5px;color:#52606d;background:#f0f4f9;padding:10px 12px;border-radius:6px;">Informe <b>agregado y anónimo</b>. No contiene respuestas individuales ni textos abiertos. Los resultados reflejan percepciones y son orientativos, no diagnósticos clínicos. Base: ${DATA.climaN} respuesta(s) de clima, ${DATA.bienN} de bienestar.</p>
+    <p style="font-size:11.5px;color:${KOR.gris};background:${KOR.crema};padding:10px 12px;border-radius:6px;">Informe <b>agregado y anónimo</b>. No contiene respuestas individuales ni textos abiertos. Los resultados reflejan percepciones y son orientativos, no diagnósticos clínicos. Base: ${DATA.climaN} respuesta(s) de clima, ${DATA.bienN} de bienestar.</p>
+
+    ${H("Indicadores clave")}${htmlTarjetas()}
 
     ${H("Resumen ejecutivo")}${P(document.getElementById("txtResumen").value)}
 
     ${H("1. Madurez de la gestión de personas")}${madTabla}${P(document.getElementById("txtMadurez").value)}
 
-    ${H("2. Clima organizacional")}${cliTabla}${P(document.getElementById("txtClima").value)}
+    ${H("2. Clima organizacional")}${cliBloque}${P(document.getElementById("txtClima").value)}
 
-    ${H("3. Bienestar laboral")}${bieTabla}${P(document.getElementById("txtBienestar").value)}
+    ${H("3. Bienestar laboral")}${bieBloque}${P(document.getElementById("txtBienestar").value)}
 
     ${H("4. Lectura integrada")}${P(document.getElementById("txtIntegrada").value)}
 
     ${H("5. Recomendaciones y próximos pasos")}${P(document.getElementById("txtRecom").value)}
 
-    <p style="font-size:10.5px;color:#8a9099;margin-top:26px;border-top:1px solid #e3e3e3;padding-top:10px;">Nota metodológica: diagnóstico basado en tres instrumentos (madurez de gestión, clima organizacional y bienestar laboral). Escalas orientativas; sin puntos de corte clínicos. Reporte agregado: requiere mínimo 5 respuestas por instrumento para proteger el anonimato. Elaborado por KÓR Consulting.</p>
+    <p style="font-size:10.5px;color:${KOR.gris};margin-top:26px;border-top:1px solid ${KOR.linea};padding-top:10px;">Nota metodológica: diagnóstico basado en tres instrumentos (madurez de gestión, clima organizacional y bienestar laboral). Escalas orientativas; sin puntos de corte clínicos. Con muestras pequeñas, los promedios deben leerse con cautela. Reporte agregado: requiere mínimo 5 respuestas por instrumento para proteger el anonimato. Elaborado por KÓR Consulting.</p>
   </div>`;
 
   const cont=document.getElementById("reporteImprimible");
   cont.innerHTML=html;
-  // Impresión nativa del navegador (Imprimir → Guardar como PDF).
-  // Ruta robusta: no depende de ninguna librería de captura.
+  // Pinta los graficos en los canvas recien insertados y luego imprime.
+  // El retraso da tiempo a Chart.js a dibujar antes del snapshot de impresion.
+  pintarGraficas();
   const tituloPrev=document.title;
   document.title=`Informe_${nombre.replace(/[^a-z0-9]/gi,'_')}`;
-  window.print();
-  setTimeout(function(){ document.title=tituloPrev; }, 800);
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ document.title=tituloPrev; }, 800);
+  }, 750);
 }
 
 function mostrar(id){document.querySelectorAll(".pantalla").forEach(p=>p.classList.remove("activa"));document.getElementById(id).classList.add("activa");}
