@@ -114,6 +114,10 @@
           <button class="btn-primario" onclick="descargarPDF()">Generar PDF (Imprimir → Guardar como PDF)</button>
         </div>
       </section>
+
+      <!-- ETAPA 3: panel solo-consultora. Vive en #resultado (pantalla),
+           fuera de #reporteImprimible, por lo que NUNCA entra al PDF. -->
+      <section class="bloque" id="panelConsultor" style="display:none;"></section>
     </div>
   </div>
 
@@ -300,6 +304,157 @@ function pintarGraficas(){
 }
 
 /* =====================================================================
+   ETAPA 3: GESTIÓN DE TALENTO (N-Box + Panel 2)  ·  SOLO CONSULTOR
+   =====================================================================
+   El dato económico (horas, productividad por modelo) NO vive en
+   Supabase: viene del software del estudio (FLE-1). Hoy es un EJEMPLO.
+   Cuando cargues datos reales de un estudio, reemplaza MODELS_EJ y sus
+   umbrales, y pon DATOS_ECONOMICOS_REALES = true para que las tarjetas
+   de zona aparezcan en el PDF del dueño. */
+const DATOS_ECONOMICOS_REALES = false;   // <<< true SOLO con datos reales del estudio
+
+// EJEMPLO (semilla 14) — no son personas reales. Reemplazar por feed FLE-1.
+const MODELS_EJ = [
+  {id:"M01",h:148,eph:15.3},{id:"M02",h:94,eph:13.8},{id:"M03",h:88,eph:10.4},
+  {id:"M04",h:38,eph:15.6},{id:"M05",h:118,eph:11.7},{id:"M06",h:154,eph:21.6},
+  {id:"M07",h:148,eph:16.3},{id:"M08",h:122,eph:15.2},{id:"M09",h:150,eph:19.1},
+  {id:"M10",h:88,eph:12.8},{id:"M11",h:130,eph:28.8},{id:"M12",h:94,eph:18.5},
+  {id:"M13",h:96,eph:29.4},{id:"M14",h:156,eph:21.8}
+];
+const H_UM = 100;    // umbral horas/mes
+const EPH_UM = 13;   // umbral productividad USD/h
+
+// Lenguaje doble: el dueño ve el nombre de DESARROLLO; el consultor ve el técnico.
+const ZONA = {
+  consolidadas:   {dueno:"Consolidadas",            consultor:"Estrella",      color:"#639922", korColor:"#5B83B0", desc:"enganche y productividad altos"},
+  potenciar:      {dueno:"Por potenciar",           consultor:"Potencial",     color:"#378ADD", korColor:"#3E5E84", desc:"productividad alta, pocas horas"},
+  crecimiento:    {dueno:"En crecimiento",          consultor:"En desarrollo", color:"#BA7517", korColor:"#C5A95E", desc:"muchas horas, productividad por subir"},
+  acompanamiento: {dueno:"Foco de acompañamiento",  consultor:"Riesgo",        color:"#E24B4A", korColor:"#B5793C", desc:"enganche y productividad por desarrollar"}
+};
+function zonaDe(m){ return m.h>=H_UM ? (m.eph>=EPH_UM?"consolidadas":"crecimiento")
+                                     : (m.eph>=EPH_UM?"potenciar":"acompanamiento"); }
+function conteoZonas(ms){ const c={consolidadas:0,potenciar:0,crecimiento:0,acompanamiento:0}; ms.forEach(m=>c[zonaDe(m)]++); return c; }
+function ephZona(ms,z){ const a=ms.filter(m=>zonaDe(m)===z); return a.length? a.reduce((s,m)=>s+m.eph,0)/a.length : null; }
+// Enmascarado de celdas pequeñas: 1 o 2 personas -> "≤2" (anti re-identificación).
+function maskConteo(n){ return n===0?"0":(n<=2?"≤2":String(n)); }
+
+// ---- N-Box SVG (scatter individual M01..M14) — SOLO CONSULTOR ----
+function _px(h){ return 60+(h/180)*540; }
+function _py(e){ return 300-(e/32)*270; }
+function nboxSVG(ms){
+  const tx=_px(H_UM), ty=_py(EPH_UM);
+  let pts="";
+  ms.forEach(m=>{ const x=_px(m.h), y=_py(m.eph), c=ZONA[zonaDe(m)].color;
+    pts+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" fill="${c}" fill-opacity="0.85"/>`
+       + `<text x="${(x+9).toFixed(1)}" y="${(y+4).toFixed(1)}" font-size="10" fill="#6B6B66">${m.id}</text>`; });
+  return `<svg viewBox="0 0 640 360" width="100%">
+    <rect x="60" y="30" width="${(tx-60).toFixed(1)}" height="${(ty-30).toFixed(1)}" fill="#378ADD" fill-opacity="0.05"/>
+    <rect x="${tx.toFixed(1)}" y="30" width="${(600-tx).toFixed(1)}" height="${(ty-30).toFixed(1)}" fill="#639922" fill-opacity="0.05"/>
+    <rect x="60" y="${ty.toFixed(1)}" width="${(tx-60).toFixed(1)}" height="${(300-ty).toFixed(1)}" fill="#E24B4A" fill-opacity="0.05"/>
+    <rect x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" width="${(600-tx).toFixed(1)}" height="${(300-ty).toFixed(1)}" fill="#BA7517" fill-opacity="0.05"/>
+    <line x1="60" y1="300" x2="600" y2="300" stroke="#B4B2A9"/><line x1="60" y1="30" x2="60" y2="300" stroke="#B4B2A9"/>
+    <line x1="${tx.toFixed(1)}" y1="30" x2="${tx.toFixed(1)}" y2="300" stroke="#C8C6BF" stroke-dasharray="4 4"/>
+    <line x1="60" y1="${ty.toFixed(1)}" x2="600" y2="${ty.toFixed(1)}" stroke="#C8C6BF" stroke-dasharray="4 4"/>
+    <text x="${tx.toFixed(1)}" y="316" font-size="11" fill="#9A9A94" text-anchor="middle">${H_UM} h</text>
+    <text x="52" y="${(ty+3).toFixed(1)}" font-size="11" fill="#9A9A94" text-anchor="end">$${EPH_UM}</text>
+    <text x="330" y="346" font-size="12" fill="#6B6B66" text-anchor="middle">Horas transmitidas/mes</text>
+    <text x="22" y="165" font-size="12" fill="#6B6B66" text-anchor="middle" transform="rotate(-90 22 165)">Productividad (USD/h)</text>
+    <text x="${(tx+8).toFixed(1)}" y="46" font-size="11" fill="#639922" font-weight="500">Estrella</text>
+    <text x="68" y="46" font-size="11" fill="#378ADD" font-weight="500">Potencial</text>
+    <text x="592" y="294" font-size="11" fill="#BA7517" font-weight="500" text-anchor="end">En desarrollo</text>
+    <text x="68" y="294" font-size="11" fill="#E24B4A" font-weight="500">Riesgo</text>
+    ${pts}</svg>`;
+}
+
+// ---- Tarjetas de zona SEGURAS para el dueño (lenguaje de desarrollo) ----
+function htmlZonasDueno(){
+  const cz=conteoZonas(MODELS_EJ);
+  const card=(z)=>{ const Z=ZONA[z];
+    return `<div style="flex:1 1 0;min-width:130px;border:1px solid ${KOR.linea};border-left:4px solid ${Z.korColor};border-radius:8px;padding:10px 12px;background:#fff;">
+      <div style="font-size:21px;font-weight:700;color:${KOR.negro};line-height:1;">${maskConteo(cz[z])}</div>
+      <div style="font-size:12px;font-weight:600;color:${Z.korColor};margin-top:3px;">${Z.dueno}</div>
+      <div style="font-size:10px;color:${KOR.gris};margin-top:2px;">${Z.desc}</div></div>`; };
+  const avisoEj = DATOS_ECONOMICOS_REALES ? "" :
+    `<p style="font-size:10px;color:${KOR.terracota};margin-top:6px;font-weight:600;">Composición ilustrativa con datos de ejemplo del periodo de prueba (pendiente de los datos operativos del estudio). Pon DATOS_ECONOMICOS_REALES = true cuando uses cifras reales.</p>`;
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;">${["consolidadas","potenciar","crecimiento","acompanamiento"].map(card).join("")}</div>
+    ${avisoEj}
+    <p style="font-size:10px;color:${KOR.gris};margin-top:4px;">Composición del equipo por enganche y productividad. Grupos pequeños se muestran como "≤2" para proteger la identidad. Sin datos individuales.</p>`;
+}
+
+// ---- Panel solo-consultor: N-Box + Panel 2 ----
+let _imcocChart=null;
+function renderConsultor(){
+  const cont=document.getElementById("panelConsultor");
+  if(!cont) return;
+  const cz=conteoZonas(MODELS_EJ);
+  const riesgo=MODELS_EJ.filter(m=>zonaDe(m)==="acompanamiento");
+  const mc=(l,v)=>`<div style="background:${KOR.crema};border-radius:8px;padding:10px 12px;flex:1 1 0;min-width:120px;">
+      <div style="font-size:11px;color:${KOR.gris};">${l}</div><div style="font-size:20px;font-weight:700;color:${KOR.negro};">${v}</div></div>`;
+  const seg=(z)=>{ const Z=ZONA[z], e=ephZona(MODELS_EJ,z);
+    return `<div style="background:${KOR.crema};border-radius:8px;padding:9px 12px;border-left:3px solid ${Z.color};flex:1 1 0;min-width:120px;">
+      <div style="font-size:11px;color:${KOR.gris};">${Z.consultor} · n=${cz[z]}</div>
+      <div style="font-size:16px;font-weight:700;">${e!=null?"$"+e.toFixed(1)+"/h":"—"}</div></div>`; };
+
+  let imcocBlock = DATA.clima
+    ? `<div style="position:relative;width:100%;height:340px;"><canvas id="cnvIMCOC"></canvas></div>
+       <p style="font-size:11px;color:${KOR.gris};margin-top:4px;">Líneas de referencia en 4,0 (crítica) y 5,5 (fortaleza). Datos reales de este estudio (Supabase).</p>`
+    : `<p class="muted">Sin datos de clima suficientes (5+ respuestas) para las barras IMCOC.</p>`;
+
+  cont.style.display="block";
+  cont.innerHTML = `
+    <h2 style="color:${KOR.terracota};">Vista solo-consultora · no se imprime ni se comparte con el dueño</h2>
+    <div class="nota" style="background:#fff6ef;border-color:#ecd3bd;color:#7a4a1e;">
+      <b>Datos de gestión de talento: EJEMPLO.</b> Horas y productividad son sintéticos (semilla 14), no provienen de Supabase. Reemplazar por el feed del software del estudio (FLE-1). El clima (barras IMCOC) sí es real de este estudio.
+    </div>
+
+    <div class="fuente" style="margin-top:14px;">Rejilla de talento (N-Box) · individual, solo consultor</div>
+    <p class="muted" style="margin-bottom:6px;">Enganche (horas/mes) × productividad (USD/h). Umbrales: ${H_UM} h · $${EPH_UM}/h. Esta vista con M01…M14 <b>nunca</b> va al dueño (la posición de un punto, cruzada con su libreta de horas, re-identifica).</p>
+    <div style="margin-bottom:6px;">
+      <span style="font-size:12px;color:${KOR.gris};margin-right:12px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#639922;"></span> Estrella</span>
+      <span style="font-size:12px;color:${KOR.gris};margin-right:12px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#378ADD;"></span> Potencial</span>
+      <span style="font-size:12px;color:${KOR.gris};margin-right:12px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#BA7517;"></span> En desarrollo</span>
+      <span style="font-size:12px;color:${KOR.gris};"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E24B4A;"></span> Riesgo</span>
+    </div>
+    ${nboxSVG(MODELS_EJ)}
+
+    <div class="fuente" style="margin-top:18px;">Vista analítica · KPIs de talento</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${mc("Modelas en riesgo", riesgo.length+(riesgo.length?" ("+riesgo.map(m=>m.id).join(" · ")+")":""))}
+      ${mc("Productividad media estrellas", (ephZona(MODELS_EJ,"consolidadas")||0).toFixed(1)+"/h")}
+      ${mc("Productividad media riesgo", (ephZona(MODELS_EJ,"acompanamiento")||0).toFixed(1)+"/h")}
+      ${mc("Consolidadas (%)", Math.round(cz.consolidadas/MODELS_EJ.length*100)+"%")}
+    </div>
+
+    <div class="fuente" style="margin-top:18px;">Clima organizacional IMCOC-W (real)</div>
+    ${imcocBlock}
+
+    <div class="fuente" style="margin-top:18px;">Productividad por segmento (USD/h)</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${seg("consolidadas")}${seg("potenciar")}${seg("crecimiento")}${seg("acompanamiento")}
+    </div>
+
+    <div class="fuente" style="margin-top:18px;">Vista que recibiría el dueño (segura, agregada)</div>
+    <p class="muted" style="margin-bottom:6px;">Esto es lo único de gestión de talento que puede ir al dueño: zonas con conteos, en lenguaje de desarrollo, sin individuos.</p>
+    ${htmlZonasDueno()}
+  `;
+
+  // Barras IMCOC reales (Chart.js) con líneas de referencia y etiqueta de valor
+  if(_imcocChart){ try{_imcocChart.destroy();}catch(e){} _imcocChart=null; }
+  if(DATA.clima){
+    const dims=DATA.clima.map(d=>({l:d.nombre, v:+d.prom.toFixed(2), c:d.clasif[1]}));
+    const colC={fav:"#639922", neu:"#BA7517", des:"#E24B4A"};
+    const refLines={id:"ref",afterDraw(ch){const{ctx,chartArea:{top,bottom},scales:{x}}=ch;[4,5.5].forEach(v=>{const xp=x.getPixelForValue(v);ctx.save();ctx.strokeStyle="rgba(128,128,128,.55)";ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);ctx.stroke();ctx.restore();});}};
+    const valLab={id:"vl",afterDatasetsDraw(ch){const{ctx}=ch;ch.getDatasetMeta(0).data.forEach((b,i)=>{ctx.save();ctx.font="600 12px 'Segoe UI',sans-serif";ctx.fillStyle=KOR.negro;ctx.textBaseline="middle";ctx.fillText(dims[i].v.toFixed(1),b.x+6,b.y);ctx.restore();});}};
+    _imcocChart=new Chart(document.getElementById("cnvIMCOC"),{type:"bar",
+      data:{labels:dims.map(d=>d.l),datasets:[{data:dims.map(d=>d.v),backgroundColor:dims.map(d=>colC[d.c]),borderRadius:3,barThickness:24}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:34}},
+        plugins:{legend:{display:false},tooltip:{enabled:false},datalabels:{display:false}},
+        scales:{x:{min:0,max:7,ticks:{stepSize:1},grid:{display:false}},y:{ticks:{font:{size:12}},grid:{display:false}}}},
+      plugins:[refLines,valLab]});
+  }
+}
+
+/* =====================================================================
    LOGIN
    ===================================================================== */
 async function login(){
@@ -375,6 +530,7 @@ async function generar(){
 
   renderPrevia();
   generarBorradores();
+  renderConsultor();
   document.getElementById("resultado").style.display="block";
   window.scrollTo(0,document.getElementById("resultado").offsetTop);
 }
@@ -558,6 +714,8 @@ function descargarPDF(){
     <p style="font-size:11.5px;color:${KOR.gris};background:${KOR.crema};padding:10px 12px;border-radius:6px;">Informe <b>agregado y anónimo</b>. No contiene respuestas individuales ni textos abiertos. Los resultados reflejan percepciones y son orientativos, no diagnósticos clínicos. Base: ${DATA.climaN} respuesta(s) de clima, ${DATA.bienN} de bienestar.</p>
 
     ${H("Indicadores clave")}${htmlTarjetas()}
+
+    ${H("Composición del equipo")}${htmlZonasDueno()}
 
     ${H("Resumen ejecutivo")}${P(document.getElementById("txtResumen").value)}
 
