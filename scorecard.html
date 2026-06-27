@@ -12,85 +12,86 @@
   @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Black.otf') format('opentype');font-weight:800;font-display:swap;}
 
   :root{
-    --eerie:#1B1B1B; --denim:#1C1C2B; --washed:#343434;
-    --primary:#C0B4FE; --primary-2:#8b7fe0; --primary-soft:#E7E2FB;
-    --white:#fff; --ink:#1B1B1B; --muted:#A8A6B5; --soft:#D9D7E0;
-    --line:rgba(255,255,255,.10);
-    --panel-a:#23222b; --panel-b:#191820;
-    /* Triada on-brand: lavanda (bien) -> violeta profundo (medio) -> coral (alerta) */
-    --estr:#C0B4FE; --info:#9E8BEC; --inex:#FF8B8B;
-    --estr-bg:rgba(192,180,254,.10); --info-bg:rgba(158,139,236,.12); --inex-bg:rgba(255,139,139,.10);
-    --estr-bd:rgba(192,180,254,.42); --info-bd:rgba(158,139,236,.42); --inex-bd:rgba(255,139,139,.40);
+    /* ===== Paleta CLARA ===== */
+    --paper:#FAFAFA; --paper-2:#F1ECFC;
+    --ink:#0D0D0D; --ink-soft:#332d44; --muted:#5f5c6b; --soft:#3b3947;
+    --lav:#A58CF4; --lav-deep:#433075; --lav-soft:#ECE6FB;
+    --line:rgba(22,20,40,.12);
+    /* Triada semántica — rellenos */
+    --estr:#A58CF4; --info:#9E8BEC; --inex:#FF8B8B;
+    /* Triada semántica — texto sobre blanco (AA) */
+    --estr-tx:#5a3fb0; --info-tx:#6b53b8; --inex-tx:#c0432e;
+    --estr-bg:rgba(165,140,244,.14); --info-bg:rgba(158,139,236,.14); --inex-bg:rgba(255,139,139,.14);
+    --estr-bd:rgba(67,48,117,.30); --info-bd:rgba(107,83,184,.32); --inex-bd:rgba(192,67,46,.30);
     --radius:16px;
     --font:'Aileron', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:var(--font);color:var(--white);background:var(--eerie);line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased}
+  body{margin:0;font-family:var(--font);color:var(--ink);background:var(--paper);line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding:18px 18px 70px}
   header.top{text-align:center;padding:20px 0 4px}
-  header.top .logo{height:34px;width:auto;filter:invert(1) brightness(2)}
-  .barra{width:42px;height:3px;background:var(--primary);margin:14px auto 0;border-radius:2px}
-  .card{background:linear-gradient(180deg,var(--panel-a),var(--panel-b));border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:16px 0;box-shadow:0 24px 60px -38px rgba(0,0,0,.8)}
-  h1{font-size:1.6rem;line-height:1.12;margin:0 0 12px;color:var(--white);font-weight:800;letter-spacing:-.01em}
-  h2{font-size:1.22rem;margin:0 0 8px;color:var(--white);font-weight:700;letter-spacing:-.01em}
+  header.top .logo{height:34px;width:auto}
+  .barra{width:42px;height:3px;background:var(--lav);margin:14px auto 0;border-radius:2px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:16px 0;box-shadow:0 22px 50px -34px rgba(40,30,90,.4)}
+  h1{font-size:1.6rem;line-height:1.12;margin:0 0 12px;color:var(--ink);font-weight:800;letter-spacing:-.01em}
+  h2{font-size:1.22rem;margin:0 0 8px;color:var(--ink);font-weight:700;letter-spacing:-.01em}
   p.lead{font-size:1rem;margin:0 0 14px;color:var(--soft)}
   .nota,.micro{font-size:.85rem;color:var(--muted)}
   button{font:inherit;font-weight:700;cursor:pointer;border:none;border-radius:999px;padding:13px 24px;transition:.15s}
-  .btn-primario{background:var(--primary);color:var(--ink)} .btn-primario:hover{background:#cfc6ff;transform:translateY(-1px)}
-  .btn-sec{background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,.3)}
-  .btn-sec:hover{border-color:var(--primary);color:var(--primary)}
-  .progress{height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:18px}
-  .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-2));width:0;transition:width .3s}
-  .qnum{color:var(--primary);font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+  .btn-primario{background:var(--lav-deep);color:#fff} .btn-primario:hover{background:#51408a;transform:translateY(-1px)}
+  .btn-sec{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-sec:hover{border-color:var(--lav-deep);color:var(--lav-deep)}
+  .progress{height:7px;background:rgba(22,20,40,.08);border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--lav),#7B5FE0);width:0;transition:width .3s}
+  .qnum{color:var(--lav-deep);font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
   .niveles{display:flex;flex-direction:column;gap:9px;margin:14px 0}
-  .nivel{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:rgba(255,255,255,.03);transition:.14s;text-align:left;width:100%}
-  .nivel:hover{border-color:rgba(192,180,254,.45);background:rgba(192,180,254,.05)}
+  .nivel{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:#fff;transition:.14s;text-align:left;width:100%}
+  .nivel:hover{border-color:var(--estr-bd);background:var(--estr-bg)}
   .nivel .nopt{font-size:.95rem;color:var(--soft)}
   .nivel .ntit{font-weight:700;font-size:.95rem;display:block}
   .nivel .ncrit{font-size:.88rem;color:var(--muted);margin-top:2px;display:block}
-  .nivel.sel-0{border-color:var(--inex-bd);background:var(--inex-bg)} .ntit.t0{color:var(--inex)}
-  .nivel.sel-1{border-color:var(--info-bd);background:var(--info-bg)} .ntit.t1{color:var(--info)}
-  .nivel.sel-2{border-color:var(--estr-bd);background:var(--estr-bg)} .ntit.t2{color:var(--estr)}
+  .nivel.sel-0{border-color:var(--inex-bd);background:var(--inex-bg)} .ntit.t0{color:var(--inex-tx)}
+  .nivel.sel-1{border-color:var(--info-bd);background:var(--info-bg)} .ntit.t1{color:var(--info-tx)}
+  .nivel.sel-2{border-color:var(--estr-bd);background:var(--estr-bg)} .ntit.t2{color:var(--estr-tx)}
   .prio{margin-top:8px;font-size:.9rem;color:var(--muted);display:flex;gap:8px;align-items:center}
-  .prio input{accent-color:var(--primary)}
+  .prio input{accent-color:var(--lav-deep)}
   .row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap}
   label.f{display:block;font-weight:600;font-size:.92rem;margin:16px 0 6px;color:var(--soft)}
-  select,input[type=text]{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--white);border-radius:10px;padding:12px;font:inherit}
-  select:focus,input[type=text]:focus{outline:none;border-color:var(--primary);background:rgba(192,180,254,.06)}
-  select option{background:#23222b;color:#fff}
+  select,input[type=text]{width:100%;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px;font:inherit}
+  select:focus,input[type=text]:focus{outline:none;border-color:var(--lav-deep);box-shadow:0 0 0 3px rgba(165,140,244,.25)}
+  select option{background:#fff;color:var(--ink)}
   .pill{display:inline-block;font-size:.72rem;font-weight:700;padding:4px 13px;border-radius:99px;color:var(--ink);margin-bottom:8px}
   .pill.bad{background:var(--inex)} .pill.mid{background:var(--info)} .pill.good{background:var(--estr)}
   /* Gráfica de distribución (barra apilada) */
-  .distbar{display:flex;height:16px;border-radius:99px;overflow:hidden;margin:16px 0 0;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+  .distbar{display:flex;height:16px;border-radius:99px;overflow:hidden;margin:16px 0 0;border:1px solid var(--line);background:rgba(22,20,40,.05)}
   .distbar i{display:block;height:100%}
-  .distbar i{background-image:linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.06))}
+  .distbar i{background-image:linear-gradient(180deg,rgba(255,255,255,.30),rgba(0,0,0,.05))}
   .distbar .s-estr{background-color:var(--estr)} .distbar .s-info{background-color:var(--info)} .distbar .s-inex{background-color:var(--inex)}
   .resumen{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
-  .rcard{flex:1 1 0;min-width:110px;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;background:rgba(255,255,255,.03)}
+  .rcard{flex:1 1 0;min-width:110px;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;background:#fff}
   .rcard .n{font-size:28px;font-weight:800} .rcard .l{font-size:.8rem;color:var(--muted);margin-top:2px}
   .res{border-left:3px solid var(--line);padding:10px 0 10px 16px;margin:12px 0}
   .res.l0{border-color:var(--inex)} .res.l1{border-color:var(--info)} .res.l2{border-color:var(--estr)}
-  .res h3{margin:0 0 4px;font-size:1rem;color:var(--white)} .res p{margin:0;color:var(--muted);font-size:.92rem}
-  .star{color:var(--primary);font-weight:700}
-  .profile{background:linear-gradient(160deg,rgba(192,180,254,.14),rgba(28,28,43,.4));border-color:rgba(192,180,254,.35)}
+  .res h3{margin:0 0 4px;font-size:1rem;color:var(--ink)} .res p{margin:0;color:var(--soft);font-size:.92rem}
+  .star{color:var(--lav-deep);font-weight:700}
+  .profile{background:var(--paper-2);border-color:var(--estr-bd)}
   .cruce{background:var(--info-bg);border-color:var(--info-bd);border-left:4px solid var(--info)}
-  .bignum{font-size:34px;font-weight:800;color:var(--primary);margin:6px 0;letter-spacing:-.02em}
-  .calc .field{margin:16px 0} .calc .val{color:var(--primary);font-weight:700}
-  .calc input[type=range]{width:100%;accent-color:var(--primary)}
+  .bignum{font-size:34px;font-weight:800;color:var(--lav-deep);margin:6px 0;letter-spacing:-.02em}
+  .calc .field{margin:16px 0} .calc .val{color:var(--lav-deep);font-weight:700}
+  .calc input[type=range]{width:100%;accent-color:var(--lav-deep)}
   details{margin-top:10px} summary{cursor:pointer;color:var(--muted);font-size:.88rem}
-  .cta{background:linear-gradient(120deg,rgba(192,180,254,.12),rgba(28,28,43,.3));border-color:rgba(192,180,254,.28);text-align:center}
+  .cta{background:var(--paper-2);border-color:var(--estr-bd);text-align:center}
   .hidden{display:none}
-  a.wa{display:inline-flex;align-items:center;gap:9px;background:var(--primary);color:var(--ink);text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:700;margin:8px 6px 0}
-  a.wa:hover{background:#cfc6ff}
+  a.wa{display:inline-flex;align-items:center;gap:9px;background:var(--lav-deep);color:#fff;text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:700;margin:8px 6px 0}
+  a.wa:hover{background:#51408a}
   @media print{
     .no-print{display:none!important}
-    body{background:#fff;color:#1B1B1B}
+    body{background:#fff;color:#0D0D0D}
     .card{background:#fff!important;border:1px solid #ddd;box-shadow:none}
-    h1,h2,.res h3{color:#1B1B1B!important}
+    h1,h2,.res h3{color:#0D0D0D!important}
     p.lead{color:#333} .nota,.micro,.res p,.rcard .l,.nivel .nopt{color:#555}
-    header.top .logo{filter:none}
-    .bignum{color:#3E2F86!important} .qnum,.star{color:#5B4FB0!important}
-    a.wa{color:#1B1B1B}
+    .bignum{color:#433075!important} .qnum,.star{color:#433075!important}
+    a.wa{color:#fff}
   }
 </style>
 </head>
@@ -259,7 +260,7 @@ function finish(){
             (nEstr?'<i class="s-estr" style="width:'+(nEstr*10)+'%"></i>':'')+
             (nInfo?'<i class="s-info" style="width:'+(nInfo*10)+'%"></i>':'')+
             (nInex?'<i class="s-inex" style="width:'+(nInex*10)+'%"></i>':'')+'</div>';
-  html += '<div class="resumen">'+rcard(nEstr,"con proceso definido","var(--estr)")+rcard(nInfo,"a tu manera","var(--info)")+rcard(nInex,"por empezar","var(--inex)")+'</div></div>';
+  html += '<div class="resumen">'+rcard(nEstr,"con proceso definido","var(--estr-tx)")+rcard(nInfo,"a tu manera","var(--info-tx)")+rcard(nInex,"por empezar","var(--inex-tx)")+'</div></div>';
 
   const activas = parseFloat($('cActivas').value);
   const salidas6 = parseFloat($('cSalidas').value);
@@ -321,7 +322,7 @@ function calcHTML(salidasAnio){
    '<div class="field"><label class="f">Semanas en conseguir y dejar lista a una reemplazo: <span class="val" id="vSem">3</span></label><input type="range" id="iSem" min="1" max="12" value="3"></div>'+
    '<div class="field"><label class="f">Aporte mensual promedio de una modelo al estudio (en tu moneda): <span class="val" id="vAporte">1.000.000</span></label><input type="range" id="iAporte" min="100000" max="10000000" step="100000" value="1000000"></div>'+
    '<div class="field"><label class="f">En sus primeras semanas, una modelo nueva rinde alrededor del <span class="val" id="vRampa">50</span>% de lo que rinde una con experiencia.</label><input type="range" id="iRampa" min="10" max="100" value="50"></div>'+
-   '<div style="border-top:1px solid var(--linea);margin-top:14px;padding-top:14px">'+
+   '<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">'+
      '<p class="micro">Estimación conservadora con TUS supuestos (no es un dato del sector):</p>'+
      '<div class="bignum" id="costOut">—</div><p class="micro" id="costPer"></p>'+
      '<details><summary>¿Cómo se calcula?</summary><p class="micro">Aporte semanal = aporte mensual ÷ 4,33. Costo por salida = (semanas con silla vacía × aporte semanal) + (semanas de adaptación × aporte semanal × (100% − lo que rinde la nueva)). Costo al año = costo por salida × modelos que se van al año.</p></details>'+
