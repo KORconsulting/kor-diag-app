@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOR Consulting · La rotación de tus modelos cuesta más de lo que crees</title>
+<style>
+  /* ===== Fuentes: Aileron (CC0, libre web) ===== */
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Light.otf') format('opentype');font-weight:300;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Regular.otf') format('opentype');font-weight:400;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-SemiBold.otf') format('opentype');font-weight:600;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Bold.otf') format('opentype');font-weight:700;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Black.otf') format('opentype');font-weight:800;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Heavy.otf') format('opentype');font-weight:900;font-display:swap;}
+
+  :root{
+    --eerie:#1B1B1B; --washed:#343434; --denim:#1C1C2B;
+    --primary:#C0B4FE; --primary-soft:#E7E2FB;
+    --white:#fff; --ink:#1B1B1B; --paper:#F7F6F3;
+    --muted:#A8A6B5; --line:rgba(255,255,255,.10);
+    --maxw:1180px; --radius:20px;
+    --font:'Aileron', system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--font);background:var(--eerie);color:var(--white);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+
+  /* ===== NAV ===== */
+  header{position:sticky;top:0;z-index:50;padding:18px 0;}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:18px;
+       background:rgba(43,41,46,.55);backdrop-filter:blur(14px);
+       border:1px solid var(--line);border-radius:999px;padding:10px 12px 10px 22px;}
+  .nav .logo{height:34px;width:auto;filter:invert(1) brightness(2);}
+  .nav nav{display:flex;gap:28px;}
+  .nav nav a{font-size:14px;color:#D9D7E0;font-weight:600;transition:.15s;}
+  .nav nav a:hover{color:var(--primary);}
+  .nav-cta{font-weight:700;font-size:14px;background:var(--primary);color:var(--ink);
+           border-radius:999px;padding:11px 20px;display:inline-flex;align-items:center;gap:8px;transition:.15s;}
+  .nav-cta:hover{background:#cfc6ff;}
+  @media(max-width:860px){.nav nav{display:none;}}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;overflow:hidden;}
+  /* Fondo con luz de set morada (sin foto) */
+  .hero::before{content:"";position:absolute;inset:0;z-index:0;
+    background:
+      radial-gradient(48% 60% at 84% 22%, rgba(192,180,254,.30), transparent 62%),
+      radial-gradient(40% 50% at 92% 78%, rgba(150,120,255,.18), transparent 60%),
+      radial-gradient(55% 70% at 6% 96%, rgba(28,28,43,.95), transparent 58%),
+      linear-gradient(160deg,#171622 0%, #1C1C2B 60%, #2a2740 100%);}
+  /* Halo tipo aro de luz detrás del panel */
+  .hero::after{content:"";position:absolute;z-index:0;right:-60px;top:50%;transform:translateY(-50%);
+    width:620px;height:620px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle, rgba(192,180,254,.22) 0%, rgba(192,180,254,.10) 38%, transparent 62%);}
+  .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;
+              padding:72px 0 96px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;letter-spacing:.04em;
+           color:var(--primary);background:rgba(192,180,254,.10);border:1px solid rgba(192,180,254,.3);
+           border-radius:999px;padding:7px 14px;margin-bottom:22px;}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--primary);}
+  .hero h1{font-weight:900;font-size:clamp(36px,5.4vw,62px);line-height:1.02;letter-spacing:-.025em;}
+  .hero h1 em{font-style:normal;color:var(--primary);}
+  .hero p.sub{font-size:18px;color:#D9D7E0;max-width:48ch;margin:22px 0 32px;font-weight:300;}
+  .hero p.sub b{font-weight:600;color:#fff;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{font-weight:700;font-size:15px;border-radius:999px;padding:15px 26px;display:inline-flex;align-items:center;gap:11px;cursor:pointer;border:1.5px solid transparent;transition:.15s;}
+  .btn-primary{background:var(--primary);color:var(--ink);}
+  .btn-primary:hover{background:#cfc6ff;transform:translateY(-1px);}
+  .btn-ghost{border-color:rgba(255,255,255,.3);color:#fff;}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+  .btn .arrow{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--primary);display:grid;place-items:center;}
+  .btn-ghost .arrow{background:var(--primary);color:var(--ink);}
+  /* ===== Iconos SVG (Lucide ISC + Simple Icons / WhatsApp) ===== */
+  .ico{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .arrow .ico{width:14px;height:14px;}
+  .ico-fill{width:18px;height:18px;flex:none;fill:currentColor;}
+  .trust{display:flex;align-items:center;gap:10px;margin-top:30px;font-size:13.5px;color:var(--muted);}
+  .trust .keys{display:flex;gap:6px;}
+  .trust .keys span{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:#cfcdd8;}
+
+  /* ===== MOCKUP (imagen de producto, original) ===== */
+  .mock{position:relative;}
+  .mock .panel{background:linear-gradient(180deg,#23222b,#191820);border:1px solid var(--line);
+       border-radius:var(--radius);padding:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8);}
+  .mock .phead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+  .mock .phead h4{font-size:15px;font-weight:700;}
+  .mock .phead .psub2{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .mock .phead .live{font-size:11px;color:var(--primary);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .mock .phead .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 0 rgba(192,180,254,.5);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,180,254,.45);}70%{box-shadow:0 0 0 7px rgba(192,180,254,0);}100%{box-shadow:0 0 0 0 rgba(192,180,254,0);}}
+  /* Fila de métricas nativas del sector (estilo ERP) */
+  .statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+  .stat{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:11px 12px;}
+  .stat .sv{font-size:21px;font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;gap:5px;line-height:1;}
+  .stat .sv small{font-size:12px;font-weight:700;color:var(--muted);}
+  .stat .sv.warn{color:#FF8B8B;}
+  .stat .sl{font-size:10.5px;color:var(--muted);margin-top:5px;}
+  .coin{width:17px;height:17px;flex:none;color:var(--primary);}
+  /* Insight docked bajo la gráfica */
+  .insight{display:flex;align-items:center;gap:11px;margin-top:14px;background:linear-gradient(120deg,rgba(192,180,254,.16),rgba(192,180,254,.05));border:1px solid rgba(192,180,254,.3);border-radius:12px;padding:11px 13px;}
+  .insight .ii{width:30px;height:30px;flex:none;border-radius:8px;background:rgba(192,180,254,.18);color:var(--primary);display:grid;place-items:center;}
+  .insight .ii .ico{width:16px;height:16px;}
+  .insight .itx{font-size:12.5px;color:#E3E1EA;line-height:1.4;}
+  .insight .itx b{color:#fff;font-weight:800;}
+  /* Tira "piso del estudio": rúms al aire */
+  .salas{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:18px;}
+  .salas .slabel{font-size:10.5px;color:var(--muted);margin-right:4px;}
+  .sala{font-size:10.5px;font-weight:700;color:#8a8896;border:1px solid var(--line);border-radius:7px;padding:4px 8px;display:inline-flex;align-items:center;gap:5px;}
+  .sala.on{color:var(--primary);border-color:rgba(192,180,254,.4);background:rgba(192,180,254,.08);}
+  .sala.on::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--primary);}
+  .sala.off::before{content:"";width:6px;height:6px;border-radius:50%;background:#56545f;}
+  .chartcard{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:14px 14px 8px;}
+  .chartcard .ct{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .chartcard .ct span{font-size:12px;color:var(--muted);}
+  .chartcard .ct b{font-size:12px;color:#fff;}
+  .bars{display:flex;align-items:flex-end;gap:9px;height:92px;}
+  .bars .b{flex:1;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#3a3550,#2a2740);position:relative;}
+  .bars .b.hot{background:linear-gradient(180deg,#C0B4FE,#8b7fe0);}
+  .bars .b span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted);}
+  @media(max-width:860px){
+    .hero-inner{grid-template-columns:1fr;gap:40px;padding:48px 0 64px;}
+    .hero::after{display:none;}
+  }
+
+  /* ===== SECCIONES (encabezado común) ===== */
+  .section{padding:90px 0;}
+  .sec-head{max-width:660px;margin-bottom:50px;}
+  .kicker{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);margin-bottom:14px;}
+  .sec-head h2{font-weight:800;font-size:clamp(28px,4vw,42px);letter-spacing:-.02em;line-height:1.06;}
+  .sec-head p.intro{color:var(--muted);font-size:17px;margin-top:16px;}
+
+  /* ===== 02 · VALOR ===== */
+  .valor{background:var(--denim);}
+  .valor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .vcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:28px 22px;transition:.18s;}
+  .vcard:hover{border-color:rgba(192,180,254,.4);transform:translateY(-3px);}
+  .vicon{width:50px;height:50px;border-radius:14px;background:rgba(192,180,254,.12);border:1px solid rgba(192,180,254,.25);display:grid;place-items:center;margin-bottom:22px;color:var(--primary);}
+  .vicon .ico{width:24px;height:24px;}
+  .vcard h3{font-size:17px;font-weight:700;margin-bottom:10px;line-height:1.25;}
+  .vcard p{font-size:14px;color:var(--muted);line-height:1.55;}
+  @media(max-width:900px){.valor-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:540px){.valor-grid{grid-template-columns:1fr;}}
+
+  /* ===== 03 · PROBLEMA ===== */
+  .problema{background:var(--eerie);}
+  .prob-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:46px;align-items:start;}
+  .pains{display:flex;flex-direction:column;gap:13px;}
+  .pain{display:flex;gap:15px;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:17px 19px;transition:.15s;}
+  .pain:hover{border-color:rgba(192,180,254,.3);}
+  .pain .pico{width:38px;height:38px;flex:none;border-radius:10px;background:rgba(192,180,254,.10);color:var(--primary);display:grid;place-items:center;}
+  .pain .pico .ico{width:19px;height:19px;}
+  .pain p{font-size:15px;color:#E3E1EA;line-height:1.5;}
+  .pain p b{color:#fff;font-weight:700;}
+  .costcard{background:linear-gradient(180deg,#23222b,#191820);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:0 30px 80px -40px rgba(0,0,0,.85);position:sticky;top:90px;}
+  .costcard .ch{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .costcard .cbig{font-size:42px;font-weight:900;letter-spacing:-.03em;color:#fff;line-height:1;}
+  .costcard .cbig small{font-size:15px;font-weight:600;color:var(--muted);}
+  .costcard .ctag{font-size:11px;color:var(--primary);background:rgba(192,180,254,.1);border:1px solid rgba(192,180,254,.25);border-radius:6px;padding:3px 9px;display:inline-block;margin-top:12px;}
+  .costbreak{margin-top:24px;display:flex;flex-direction:column;gap:15px;}
+  .cbrow .cbtop{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;}
+  .cbrow .cbtop b{color:#fff;font-weight:600;} .cbrow .cbtop span{color:var(--muted);}
+  .cbbar{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;}
+  .cbbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#C0B4FE,#8b7fe0);}
+  .hook{margin-top:42px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+        background:linear-gradient(120deg,rgba(192,180,254,.14),rgba(28,28,43,.35));border:1px solid rgba(192,180,254,.3);border-radius:20px;padding:26px 30px;}
+  .hook h3{font-size:clamp(18px,2.4vw,25px);font-weight:800;letter-spacing:-.01em;}
+  .hook p{color:var(--muted);font-size:14px;margin-top:5px;}
+  @media(max-width:860px){.prob-grid{grid-template-columns:1fr;gap:30px;}.costcard{position:static;}}
+
+  /* ===== 04 · MÉTODO ===== */
+  .metodo{background:var(--denim);}
+  .met-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+  .steps{display:flex;flex-direction:column;}
+  .step{display:flex;gap:18px;padding-bottom:28px;position:relative;}
+  .step:last-child{padding-bottom:0;}
+  .step:not(:last-child)::before{content:"";position:absolute;left:21px;top:50px;bottom:4px;width:2px;background:linear-gradient(var(--primary),rgba(192,180,254,.12));}
+  .step .num{width:44px;height:44px;flex:none;border-radius:12px;background:rgba(192,180,254,.12);border:1px solid rgba(192,180,254,.3);color:var(--primary);font-weight:800;font-size:17px;display:grid;place-items:center;z-index:1;}
+  .step .stxt h3{font-size:17px;font-weight:700;margin-bottom:6px;}
+  .step .stxt p{font-size:14px;color:var(--muted);line-height:1.55;}
+  .step .stxt .free{font-size:11px;color:#7CE3A4;border:1px solid rgba(124,227,164,.3);background:rgba(124,227,164,.08);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:9px;}
+  .report{background:linear-gradient(180deg,#23222b,#191820);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 30px 80px -40px rgba(0,0,0,.85);position:sticky;top:90px;}
+  .rep-h{display:flex;justify-content:space-between;align-items:center;}
+  .rep-h h4{font-size:14px;font-weight:700;}
+  .rep-sub{font-size:12px;color:var(--muted);margin:6px 0 18px;}
+  .rep-block{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:12px;}
+  .rep-block .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .rep-block .lbl .ico{width:15px;height:15px;}
+  .quote{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#E3E1EA;padding:11px 0;border-top:1px solid var(--line);}
+  .quote:first-of-type{border-top:none;padding-top:0;}
+  .quote .qi{color:var(--primary);flex:none;margin-top:1px;}
+  .quote .qi .ico{width:16px;height:16px;}
+  .quote .qtag{display:block;font-size:11px;color:var(--muted);margin-top:4px;}
+  .oneline{margin-top:42px;background:linear-gradient(120deg,rgba(192,180,254,.12),rgba(28,28,43,.3));border:1px solid rgba(192,180,254,.28);border-radius:20px;padding:30px 34px;}
+  .oneline p{font-size:clamp(17px,2.3vw,23px);font-weight:600;line-height:1.45;letter-spacing:-.01em;}
+  .oneline p b{color:var(--primary);font-weight:800;}
+  @media(max-width:860px){.met-grid{grid-template-columns:1fr;gap:32px;}.report{position:static;}}
+
+  /* ===== 05 · TALLERES RUM (bento) ===== */
+  .rum{background:var(--eerie);}
+  .rum-group + .rum-group{margin-top:46px;}
+  .rgrp-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap;}
+  .rtag{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--primary);background:rgba(192,180,254,.1);border:1px solid rgba(192,180,254,.3);border-radius:999px;padding:7px 15px;}
+  .rfor{font-size:13.5px;color:var(--muted);}
+  .rum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .wcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:.18s;display:flex;flex-direction:column;}
+  .wcard:hover{border-color:rgba(192,180,254,.4);transform:translateY(-3px);}
+  .wcard .wtop{height:74px;background:linear-gradient(120deg,#2a2740,#1C1C2B);display:flex;align-items:flex-end;padding:14px 16px;}
+  .wcard .wtop .wn{font-weight:900;font-size:22px;color:var(--primary);line-height:1;}
+  .wcard .wbody{padding:16px 18px 20px;}
+  .wcard h3{font-size:15.5px;font-weight:700;margin-bottom:8px;line-height:1.28;}
+  .wcard p{font-size:13px;color:var(--muted);line-height:1.5;}
+  .wcard.feat{grid-column:span 2;}
+  .wcard.feat .wtop{height:128px;background:linear-gradient(125deg,#C0B4FE 0%,#3a3550 60%,#1C1C2B 100%);}
+  .wcard.feat .wtop .wn{color:#1B1B1B;}
+  .wcard.feat h3{font-size:19px;}
+  .rum-group.mod .wcard.feat .wtop{background:linear-gradient(125deg,#1C1C2B 0%,#3a3550 45%,#C0B4FE 100%);}
+  .rum-group.mod .wcard.feat .wtop .wn{color:#fff;}
+  @media(max-width:900px){.rum-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.rum-grid{grid-template-columns:1fr;}.wcard.feat{grid-column:span 1;}}
+
+  /* ===== 06 · NOSOTROS ===== */
+  .nosotros{background:var(--denim);}
+  .nos-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:48px;align-items:center;}
+  /* Slot de foto del equipo: muestra la foto si existe; si no, respaldo elegante */
+  .nos-media{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
+             aspect-ratio:4/5;box-shadow:0 30px 80px -40px rgba(0,0,0,.85);}
+  .nos-media img{width:100%;height:100%;object-fit:cover;display:block;}
+  .nos-fallback{position:absolute;inset:0;display:grid;place-items:center;
+       background:linear-gradient(150deg,#2a2740 0%,#1C1C2B 55%,#191820 100%);}
+  .nos-fallback::before{content:"";position:absolute;inset:0;
+       background:radial-gradient(60% 60% at 70% 18%, rgba(192,180,254,.22), transparent 60%);}
+  .nos-fallback .mk{position:relative;text-align:center;color:var(--primary);}
+  .nos-fallback .mk svg{width:74px;height:74px;opacity:.9;}
+  .nos-fallback .mk span{display:block;margin-top:16px;font-size:12px;letter-spacing:.04em;color:var(--muted);max-width:22ch;}
+  .nos-copy h3{font-size:clamp(20px,2.6vw,27px);font-weight:800;letter-spacing:-.01em;line-height:1.18;margin-bottom:16px;}
+  .nos-copy p{font-size:15.5px;color:#D9D7E0;line-height:1.62;font-weight:300;}
+  .nos-copy p + p{margin-top:16px;}
+  .nos-copy p b{font-weight:600;color:#fff;}
+  .nos-origin{font-size:14.5px;color:var(--muted);border-left:2px solid rgba(192,180,254,.4);padding-left:18px;margin-top:24px;}
+  .mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:46px;}
+  .mvcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:28px 26px;transition:.18s;}
+  .mvcard:hover{border-color:rgba(192,180,254,.4);transform:translateY(-3px);}
+  .mvcard .mvic{width:46px;height:46px;border-radius:12px;background:rgba(192,180,254,.12);border:1px solid rgba(192,180,254,.25);display:grid;place-items:center;color:var(--primary);margin-bottom:20px;}
+  .mvcard .mvic .ico{width:22px;height:22px;}
+  .mvcard .mvk{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-bottom:10px;}
+  .mvcard p{font-size:15px;color:#D9D7E0;line-height:1.58;}
+  @media(max-width:860px){.nos-grid{grid-template-columns:1fr;gap:34px;}.nos-media{aspect-ratio:16/10;max-width:520px;}.mv-grid{grid-template-columns:1fr;}}
+
+  /* ===== 07 · CONTACTO ===== */
+  .contacto{background:var(--eerie);}
+  .con-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start;}
+  .con-left h3{font-size:clamp(20px,2.6vw,26px);font-weight:800;letter-spacing:-.01em;line-height:1.18;margin-bottom:14px;}
+  .con-left p.lead{font-size:15.5px;color:var(--muted);line-height:1.6;margin-bottom:26px;max-width:42ch;}
+  .con-channels{display:flex;flex-direction:column;gap:13px;}
+  .chan{display:flex;gap:15px;align-items:center;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:16px 18px;transition:.15s;}
+  .chan:hover{border-color:rgba(192,180,254,.4);transform:translateY(-2px);}
+  .chan .cic{width:44px;height:44px;flex:none;border-radius:12px;background:rgba(192,180,254,.12);border:1px solid rgba(192,180,254,.25);color:var(--primary);display:grid;place-items:center;}
+  .chan .cic .ico,.chan .cic .ico-fill{width:21px;height:21px;}
+  .chan .ctxt .ck{font-size:12px;color:var(--muted);}
+  .chan .ctxt .cv{font-size:16px;font-weight:700;color:#fff;}
+  .con-priv{margin-top:24px;font-size:12.5px;color:var(--muted);display:flex;align-items:flex-start;gap:9px;line-height:1.5;}
+  .con-priv .ico{width:15px;height:15px;flex:none;margin-top:2px;color:var(--primary);}
+
+  .con-form{background:linear-gradient(180deg,#23222b,#191820);border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:0 30px 80px -40px rgba(0,0,0,.85);}
+  .con-form .fh{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .con-form .fsub{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:#D9D7E0;margin-bottom:7px;}
+  .field input,.field textarea{width:100%;font-family:var(--font);font-size:14.5px;color:#fff;
+       background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:11px;padding:13px 15px;transition:.15s;resize:vertical;}
+  .field input::placeholder,.field textarea::placeholder{color:#8a8896;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:rgba(192,180,254,.06);}
+  .con-form .btn{width:100%;justify-content:center;margin-top:6px;}
+  .form-note{font-size:11.5px;color:var(--muted);text-align:center;margin-top:14px;}
+  @media(max-width:860px){.con-grid{grid-template-columns:1fr;gap:34px;}}
+
+  /* ===== FOOTER ===== */
+  footer.site{background:var(--denim);border-top:1px solid var(--line);padding:46px 0 38px;}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .foot .flogo{height:30px;width:auto;filter:invert(1) brightness(2);}
+  .foot nav{display:flex;gap:26px;flex-wrap:wrap;}
+  .foot nav a{font-size:13.5px;color:#C9C7D2;transition:.15s;}
+  .foot nav a:hover{color:var(--primary);}
+  .foot-legal{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.6;}
+</style>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <header>
+    <div class="wrap">
+      <div class="nav">
+        <img src="assets/KOR-mark.svg" alt="KOR" class="logo">
+        <nav>
+          <a href="#problema">El problema</a>
+          <a href="#metodo">Método KOR</a>
+          <a href="#talleres">Talleres</a>
+          <a href="#nosotros">Nosotros</a>
+        </nav>
+        <a class="nav-cta" href="#contacto"><svg class="ico-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span> HR Analytics para estudios de modelaje webcam</span>
+        <h1>La rotación de tus modelos cuesta más de lo que <em>crees</em>.</h1>
+        <p class="sub">En KOR ayudamos a los estudios webcam a entender <b>por qué se va su talento</b> y a construir las condiciones para que se quede.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="scorecard.html">Mide tu rotación gratis <span class="arrow"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span></a>
+        </div>
+      </div>
+
+      <!-- Mockup de producto (sirve de "imagen" del hero, 100% original) -->
+      <div class="mock">
+        <div class="panel">
+          <div class="phead">
+            <div>
+              <h4>Diagnóstico de rotación</h4>
+              <div class="psub2">Estudio · lectura de tus datos, sin nombres</div>
+            </div>
+            <span class="live">en vivo</span>
+          </div>
+
+          <div class="statrow">
+            <div class="stat">
+              <div class="sv">5</div>
+              <div class="sl">modelos en línea</div>
+            </div>
+            <div class="stat">
+              <div class="sv">
+                <svg class="coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></svg>
+                84<small>k</small>
+              </div>
+              <div class="sl">tokens hoy</div>
+            </div>
+            <div class="stat">
+              <div class="sv warn">68<small>%</small></div>
+              <div class="sl">rotación 30 días</div>
+            </div>
+          </div>
+
+          <div class="chartcard">
+            <div class="ct"><span>Permanencia por semana de ingreso</span><b>sem. 1 a 6</b></div>
+            <div class="bars">
+              <div class="b hot" style="height:90%"><span>S1</span></div>
+              <div class="b hot" style="height:62%"><span>S2</span></div>
+              <div class="b" style="height:40%"><span>S3</span></div>
+              <div class="b" style="height:30%"><span>S4</span></div>
+              <div class="b" style="height:22%"><span>S5</span></div>
+              <div class="b" style="height:18%"><span>S6</span></div>
+            </div>
+          </div>
+
+          <div class="insight">
+            <span class="ii"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></span>
+            <div class="itx"><b>El 80% de las salidas</b> ocurre en las primeras 3 semanas.</div>
+          </div>
+
+          <div class="salas">
+            <span class="slabel">Rúms activos</span>
+            <span class="sala on">Rúm 1</span>
+            <span class="sala on">Rúm 2</span>
+            <span class="sala off">Rúm 3</span>
+            <span class="sala on">Rúm 4</span>
+            <span class="sala on">Rúm 5</span>
+            <span class="sala off">Rúm 6</span>
+            <span class="sala on">Rúm 7</span>
+            <span class="sala off">Rúm 8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 02 · VALOR ===== -->
+  <section class="section valor" id="valor">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">02 · Por qué KOR</div>
+        <h2>Qué nos hace distintos</h2>
+        <p class="intro">Cuatro cosas que ninguna consultoría generalista te da.</p>
+      </div>
+      <div class="valor-grid">
+
+        <div class="vcard">
+          <div class="vicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3>Conocemos el sector desde adentro</h3>
+          <p>No traducimos manuales de oficina a tu realidad: entendemos cómo opera un estudio webcam.</p>
+        </div>
+
+        <div class="vcard">
+          <div class="vicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+          <h3>Empezamos por entender, no por vender</h3>
+          <p>Primero medimos y diagnosticamos; las soluciones vienen después, ancladas en datos, no en suposiciones.</p>
+        </div>
+
+        <div class="vcard">
+          <div class="vicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <h3>Confidencialidad real con las modelos</h3>
+          <p>Hablan con un tercero independiente. Eso revela lo que a un jefe nunca le dirían, y es lo que de verdad explica la rotación.</p>
+        </div>
+
+        <div class="vcard">
+          <div class="vicon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></div>
+          <h3>Ética afirmativa</h3>
+          <p>Trabajamos con respeto por el oficio de las modelos: su bienestar y su permanencia van de la mano.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 03 · PROBLEMA ===== -->
+  <section class="section problema" id="problema">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">03 · El problema</div>
+        <h2>Los dolores de cabeza que resolvemos</h2>
+        <p class="intro">La rotación no es un solo problema: es una cadena que casi nadie mide.</p>
+      </div>
+
+      <div class="prob-grid">
+        <div class="pains">
+          <div class="pain">
+            <div class="pico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+            <p>Modelos que ingresan motivadas y <b>se van a las pocas semanas</b>.</p>
+          </div>
+          <div class="pain">
+            <div class="pico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+            <p>Se asume que es por el pago, pero <b>nadie conoce la verdadera causa</b>.</p>
+          </div>
+          <div class="pain">
+            <div class="pico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+            <p>Un rúm vacío cuesta (reconfigurar cuentas, perder usuarios) y <b>nadie lo mide</b>.</p>
+          </div>
+          <div class="pain">
+            <div class="pico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <p>Monitores y líderes <b>sin herramientas</b> para sostener al equipo bajo presión.</p>
+          </div>
+          <div class="pain">
+            <div class="pico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg></div>
+            <p>Un clima tenso que <b>todos notan y nadie aborda</b>.</p>
+          </div>
+        </div>
+
+        <!-- Tarjeta de costo (imagen de producto, original) -->
+        <div class="costcard">
+          <div class="ch">Costo estimado de la rotación</div>
+          <div class="cbig">$4.2M <small>/ mes</small></div>
+          <span class="ctag">Cifras de ejemplo</span>
+          <div class="costbreak">
+            <div class="cbrow">
+              <div class="cbtop"><b>Asiento vacío (rúm sin producir)</b><span>40%</span></div>
+              <div class="cbbar"><i style="width:40%"></i></div>
+            </div>
+            <div class="cbrow">
+              <div class="cbtop"><b>Reclutar el reemplazo</b><span>35%</span></div>
+              <div class="cbbar"><i style="width:35%"></i></div>
+            </div>
+            <div class="cbrow">
+              <div class="cbtop"><b>Capacitar de nuevo</b><span>25%</span></div>
+              <div class="cbbar"><i style="width:25%"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gancho al scorecard -->
+      <div class="hook">
+        <div>
+          <h3>¿Cuánto te cuesta hoy la rotación?</h3>
+          <p>Mídelo gratis en 5 minutos, sin compartir datos de tus modelos.</p>
+        </div>
+        <a class="btn btn-primary" href="scorecard.html">Mide tu rotación gratis <span class="arrow"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 04 · MÉTODO KOR ===== -->
+  <section class="section metodo" id="metodo">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">04 · Método KOR</div>
+        <h2>Cómo trabajamos</h2>
+        <p class="intro">Cuatro pasos. Cada uno se contrata por separado: avanzas a tu ritmo.</p>
+      </div>
+
+      <div class="met-grid">
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <div class="stxt">
+              <h3>Scorecard</h3>
+              <p>Mides dónde está tu estudio. Sin compromiso.</p>
+              <span class="free">Gratis</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">2</div>
+            <div class="stxt">
+              <h3>Método KOR</h3>
+              <p>Leemos los datos que ya tienes (sin nombres) y la voz de tus modelos para encontrar dónde, cuándo y por qué se va el talento.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">3</div>
+            <div class="stxt">
+              <h3>Intervención</h3>
+              <p>Implementamos los cambios de mayor impacto y menor costo.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="num">4</div>
+            <div class="stxt">
+              <h3>Seguimiento</h3>
+              <p>Medimos si la rotación baja y ajustamos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mockup del informe (datos + voz), original -->
+        <div class="report">
+          <div class="rep-h">
+            <h4>Informe · Método KOR</h4>
+            <span class="ctag">Ejemplo</span>
+          </div>
+          <div class="rep-sub">Dónde, cuándo y por qué se va el talento.</div>
+
+          <div class="rep-block">
+            <div class="lbl"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Dónde y cuándo · datos</div>
+            <div class="bars">
+              <div class="b hot" style="height:90%"><span>S1</span></div>
+              <div class="b hot" style="height:60%"><span>S2</span></div>
+              <div class="b" style="height:38%"><span>S3</span></div>
+              <div class="b" style="height:28%"><span>S4</span></div>
+              <div class="b" style="height:20%"><span>S5</span></div>
+              <div class="b" style="height:16%"><span>S6</span></div>
+            </div>
+          </div>
+
+          <div class="rep-block" style="margin-bottom:0;">
+            <div class="lbl"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Por qué · voz de las modelos</div>
+            <div class="quote">
+              <span class="qi"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              <div>"No sentí acompañamiento al arrancar."<span class="qtag">tema: incorporación</span></div>
+            </div>
+            <div class="quote">
+              <span class="qi"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              <div>"Las metas me estresaban más que motivarme."<span class="qtag">tema: manejo de presión</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Método en una línea -->
+      <div class="oneline">
+        <p>Los datos muestran <b>dónde y cuándo</b>; la voz de las modelos da el <b>porqué</b>. No adivinamos causas: las verificamos. Por eso lo que recomendamos se sostiene.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 05 · TALLERES RUM ===== -->
+  <section class="section rum" id="talleres">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">05 · Talleres RUM</div>
+        <h2>Formación que cuida y retiene</h2>
+        <p class="intro">Nuestra línea de talleres. Dos públicos: quienes dirigen el estudio y quienes están frente a la cámara.</p>
+      </div>
+
+      <!-- RUM · Estudios -->
+      <div class="rum-group est">
+        <div class="rgrp-head">
+          <span class="rtag">RUM · Estudios</span>
+          <span class="rfor">para ti y tu equipo de liderazgo</span>
+        </div>
+        <div class="rum-grid">
+          <div class="wcard feat">
+            <div class="wtop"><span class="wn">01</span></div>
+            <div class="wbody"><h3>Más allá del dinero</h3><p>Reconocimiento, acompañamiento, liderazgo, bienestar y clima.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">02</span></div>
+            <div class="wbody"><h3>El estudio que todas quieren</h3><p>Reputación que atrae y retiene talento.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">03</span></div>
+            <div class="wbody"><h3>Los primeros 30 días</h3><p>Por qué las modelos se quedan (o se van) al arrancar.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">04</span></div>
+            <div class="wbody"><h3>Liderar bajo presión</h3><p>Liderazgo y gestión emocional en entornos exigentes.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">05</span></div>
+            <div class="wbody"><h3>Lo que el dinero no retiene</h3><p>Reconocimiento, pertenencia y permanencia.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RUM · Modelos -->
+      <div class="rum-group mod">
+        <div class="rgrp-head">
+          <span class="rtag">RUM · Modelos</span>
+          <span class="rfor">formación para tu talento</span>
+        </div>
+        <div class="rum-grid">
+          <div class="wcard feat">
+            <div class="wtop"><span class="wn">06</span></div>
+            <div class="wbody"><h3>Modelos que se distinguen</h3><p>Marca personal sin dejar de ser auténticas.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">07</span></div>
+            <div class="wbody"><h3>¿Qué busca el público?</h3><p>Entender al usuario sin tomárselo personal.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">08</span></div>
+            <div class="wbody"><h3>El arte de enganchar</h3><p>La conexión emocional, no la apariencia, sostiene los ingresos.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">09</span></div>
+            <div class="wbody"><h3>Audiencias que regresan</h3><p>Psicología aplicada a la fidelización.</p></div>
+          </div>
+          <div class="wcard">
+            <div class="wtop"><span class="wn">10</span></div>
+            <div class="wbody"><h3>Manejo emocional de métricas</h3><p>Tolerancia a la frustración y mentalidad de crecimiento.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 06 · NOSOTROS ===== -->
+  <section class="section nosotros" id="nosotros">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">06 · Nosotros</div>
+        <h2>Quiénes estamos detrás</h2>
+      </div>
+
+      <div class="nos-grid">
+        <!-- Slot de foto del equipo. Pon assets/equipo.jpg y aparece sola; mientras tanto, respaldo. -->
+        <div class="nos-media">
+          <img src="assets/equipo.jpg" alt="Equipo de KOR Consulting" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+          <div class="nos-fallback" style="display:none;">
+            <div class="mk">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Foto del equipo · próximamente</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="nos-copy">
+          <h3>Somos un equipo de psicología organizacional con formación en gestión del talento humano y especialistas en la industria camming.</h3>
+          <p>Detrás de KOR hay <b>rigor psicológico</b>, <b>análisis del comportamiento con datos</b> y <b>conocimiento real del sector</b>. Esa mezcla es lo que nos deja ver lo que una consultoría generalista no ve.</p>
+          <p class="nos-origin">Todo inició con una conversación entre compañeros: una inquietud compartida sobre una población que la psicología organizacional ignoraba por completo. De ahí llegaron más reuniones, más preguntas y más entendimiento de lo que en verdad ocurre dentro de los estudios webcam colombianos. Así nació esta consultoría.</p>
+        </div>
+      </div>
+
+      <div class="mv-grid">
+        <div class="mvcard">
+          <div class="mvic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <div class="mvk">Misión</div>
+          <p>Mejorar las condiciones en que las modelos trabajan y los estudios operan, desde la psicología organizacional, con ética afirmativa y con la independencia que ningún apoyo interno puede garantizar.</p>
+        </div>
+        <div class="mvcard">
+          <div class="mvic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="mvk">Visión</div>
+          <p>Construir el primer modelo de consultoría organizacional especializada para el sector webcam en América Latina: replicable, documentado y sostenible.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 07 · CONTACTO ===== -->
+  <section class="section contacto" id="contacto">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">07 · Contacto</div>
+        <h2>Hablemos de tu estudio</h2>
+        <p class="intro">Cuéntanos tu principal reto hoy. Te respondemos por WhatsApp, sin compromiso.</p>
+      </div>
+
+      <div class="con-grid">
+        <div class="con-left">
+          <h3>La primera conversación es gratis.</h3>
+          <p class="lead">Escríbenos por el canal que prefieras. Si quieres ir al grano, llena el formulario y se abre WhatsApp con tu mensaje listo para enviar.</p>
+
+          <div class="con-channels">
+            <a class="chan" href="https://wa.me/573045688505" target="_blank" rel="noopener">
+              <span class="cic"><svg class="ico-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.71.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></span>
+              <span class="ctxt"><span class="ck">WhatsApp</span><span class="cv">304 568 8505</span></span>
+            </a>
+            <a class="chan" href="mailto:korconsulting.co@gmail.com">
+              <span class="cic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+              <span class="ctxt"><span class="ck">Correo</span><span class="cv">korconsulting.co@gmail.com</span></span>
+            </a>
+          </div>
+
+          <p class="con-priv"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></svg> Este formulario no guarda tus datos: solo abre WhatsApp con tu mensaje. No pedimos información de tus modelos.</p>
+        </div>
+
+        <form class="con-form" id="contactForm" onsubmit="return enviarWhatsApp(event)">
+          <div class="fh">Cuéntanos lo básico</div>
+          <div class="fsub">Cuatro datos y abrimos la conversación.</div>
+          <div class="field">
+            <label for="f-nombre">Tu nombre</label>
+            <input id="f-nombre" name="nombre" type="text" placeholder="¿Con quién hablamos?" required>
+          </div>
+          <div class="field">
+            <label for="f-estudio">Estudio</label>
+            <input id="f-estudio" name="estudio" type="text" placeholder="Nombre de tu estudio">
+          </div>
+          <div class="field">
+            <label for="f-ciudad">Ciudad</label>
+            <input id="f-ciudad" name="ciudad" type="text" placeholder="¿Dónde operas?">
+          </div>
+          <div class="field">
+            <label for="f-reto">¿Cuál es tu principal reto hoy?</label>
+            <textarea id="f-reto" name="reto" rows="3" placeholder="Cuéntanos en una o dos líneas"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Abrir WhatsApp con mi mensaje <span class="arrow"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span></button>
+          <p class="form-note">Se abre WhatsApp con el texto ya escrito. Tú decides si lo envías.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site">
+    <div class="wrap">
+      <div class="foot">
+        <img src="assets/KOR-mark.svg" alt="KOR Consulting" class="flogo">
+        <nav>
+          <a href="#problema">El problema</a>
+          <a href="#metodo">Método KOR</a>
+          <a href="#talleres">Talleres</a>
+          <a href="#nosotros">Nosotros</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+      </div>
+      <div class="foot-legal">
+        KOR Consulting · Psicología organizacional para estudios de modelaje webcam. Trabajamos con confidencialidad y sin nombres, conforme a la Ley 1090 (ética profesional) y la Ley 1581 (protección de datos).
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function enviarWhatsApp(e){
+      e.preventDefault();
+      var n=document.getElementById('f-nombre').value.trim();
+      var es=document.getElementById('f-estudio').value.trim();
+      var c=document.getElementById('f-ciudad').value.trim();
+      var r=document.getElementById('f-reto').value.trim();
+      var t='Hola KOR, quiero hablar sobre la rotación en mi estudio.';
+      if(n) t+='\n\nNombre: '+n;
+      if(es) t+='\nEstudio: '+es;
+      if(c) t+='\nCiudad: '+c;
+      if(r) t+='\nReto principal: '+r;
+      window.open('https://wa.me/573045688505?text='+encodeURIComponent(t),'_blank');
+      return false;
+    }
+  </script>
+
+</body>
+</html>

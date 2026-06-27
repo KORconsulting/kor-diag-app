@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de rotación · KÓR</title>
+<style>
+  /* ===== Fuentes: Aileron (CC0) — compartidas con la landing ===== */
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Regular.otf') format('opentype');font-weight:400;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-SemiBold.otf') format('opentype');font-weight:600;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Bold.otf') format('opentype');font-weight:700;font-display:swap;}
+  @font-face{font-family:'Aileron';src:url('assets/fonts/Aileron-Black.otf') format('opentype');font-weight:800;font-display:swap;}
+
+  :root{
+    --eerie:#1B1B1B; --denim:#1C1C2B; --washed:#343434;
+    --primary:#C0B4FE; --primary-2:#8b7fe0; --primary-soft:#E7E2FB;
+    --white:#fff; --ink:#1B1B1B; --muted:#A8A6B5; --soft:#D9D7E0;
+    --line:rgba(255,255,255,.10);
+    --panel-a:#23222b; --panel-b:#191820;
+    /* Triada on-brand: lavanda (bien) -> violeta profundo (medio) -> coral (alerta) */
+    --estr:#C0B4FE; --info:#9E8BEC; --inex:#FF8B8B;
+    --estr-bg:rgba(192,180,254,.10); --info-bg:rgba(158,139,236,.12); --inex-bg:rgba(255,139,139,.10);
+    --estr-bd:rgba(192,180,254,.42); --info-bd:rgba(158,139,236,.42); --inex-bd:rgba(255,139,139,.40);
+    --radius:16px;
+    --font:'Aileron', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--white);background:var(--eerie);line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 18px 70px}
+  header.top{text-align:center;padding:20px 0 4px}
+  header.top .logo{height:34px;width:auto;filter:invert(1) brightness(2)}
+  .barra{width:42px;height:3px;background:var(--primary);margin:14px auto 0;border-radius:2px}
+  .card{background:linear-gradient(180deg,var(--panel-a),var(--panel-b));border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:16px 0;box-shadow:0 24px 60px -38px rgba(0,0,0,.8)}
+  h1{font-size:1.6rem;line-height:1.12;margin:0 0 12px;color:var(--white);font-weight:800;letter-spacing:-.01em}
+  h2{font-size:1.22rem;margin:0 0 8px;color:var(--white);font-weight:700;letter-spacing:-.01em}
+  p.lead{font-size:1rem;margin:0 0 14px;color:var(--soft)}
+  .nota,.micro{font-size:.85rem;color:var(--muted)}
+  button{font:inherit;font-weight:700;cursor:pointer;border:none;border-radius:999px;padding:13px 24px;transition:.15s}
+  .btn-primario{background:var(--primary);color:var(--ink)} .btn-primario:hover{background:#cfc6ff;transform:translateY(-1px)}
+  .btn-sec{background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,.3)}
+  .btn-sec:hover{border-color:var(--primary);color:var(--primary)}
+  .progress{height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-2));width:0;transition:width .3s}
+  .qnum{color:var(--primary);font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+  .niveles{display:flex;flex-direction:column;gap:9px;margin:14px 0}
+  .nivel{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;background:rgba(255,255,255,.03);transition:.14s;text-align:left;width:100%}
+  .nivel:hover{border-color:rgba(192,180,254,.45);background:rgba(192,180,254,.05)}
+  .nivel .nopt{font-size:.95rem;color:var(--soft)}
+  .nivel .ntit{font-weight:700;font-size:.95rem;display:block}
+  .nivel .ncrit{font-size:.88rem;color:var(--muted);margin-top:2px;display:block}
+  .nivel.sel-0{border-color:var(--inex-bd);background:var(--inex-bg)} .ntit.t0{color:var(--inex)}
+  .nivel.sel-1{border-color:var(--info-bd);background:var(--info-bg)} .ntit.t1{color:var(--info)}
+  .nivel.sel-2{border-color:var(--estr-bd);background:var(--estr-bg)} .ntit.t2{color:var(--estr)}
+  .prio{margin-top:8px;font-size:.9rem;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .prio input{accent-color:var(--primary)}
+  .row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap}
+  label.f{display:block;font-weight:600;font-size:.92rem;margin:16px 0 6px;color:var(--soft)}
+  select,input[type=text]{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--white);border-radius:10px;padding:12px;font:inherit}
+  select:focus,input[type=text]:focus{outline:none;border-color:var(--primary);background:rgba(192,180,254,.06)}
+  select option{background:#23222b;color:#fff}
+  .pill{display:inline-block;font-size:.72rem;font-weight:700;padding:4px 13px;border-radius:99px;color:var(--ink);margin-bottom:8px}
+  .pill.bad{background:var(--inex)} .pill.mid{background:var(--info)} .pill.good{background:var(--estr)}
+  /* Gráfica de distribución (barra apilada) */
+  .distbar{display:flex;height:16px;border-radius:99px;overflow:hidden;margin:16px 0 0;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+  .distbar i{display:block;height:100%}
+  .distbar i{background-image:linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.06))}
+  .distbar .s-estr{background-color:var(--estr)} .distbar .s-info{background-color:var(--info)} .distbar .s-inex{background-color:var(--inex)}
+  .resumen{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 0}
+  .rcard{flex:1 1 0;min-width:110px;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;background:rgba(255,255,255,.03)}
+  .rcard .n{font-size:28px;font-weight:800} .rcard .l{font-size:.8rem;color:var(--muted);margin-top:2px}
+  .res{border-left:3px solid var(--line);padding:10px 0 10px 16px;margin:12px 0}
+  .res.l0{border-color:var(--inex)} .res.l1{border-color:var(--info)} .res.l2{border-color:var(--estr)}
+  .res h3{margin:0 0 4px;font-size:1rem;color:var(--white)} .res p{margin:0;color:var(--muted);font-size:.92rem}
+  .star{color:var(--primary);font-weight:700}
+  .profile{background:linear-gradient(160deg,rgba(192,180,254,.14),rgba(28,28,43,.4));border-color:rgba(192,180,254,.35)}
+  .cruce{background:var(--info-bg);border-color:var(--info-bd);border-left:4px solid var(--info)}
+  .bignum{font-size:34px;font-weight:800;color:var(--primary);margin:6px 0;letter-spacing:-.02em}
+  .calc .field{margin:16px 0} .calc .val{color:var(--primary);font-weight:700}
+  .calc input[type=range]{width:100%;accent-color:var(--primary)}
+  details{margin-top:10px} summary{cursor:pointer;color:var(--muted);font-size:.88rem}
+  .cta{background:linear-gradient(120deg,rgba(192,180,254,.12),rgba(28,28,43,.3));border-color:rgba(192,180,254,.28);text-align:center}
+  .hidden{display:none}
+  a.wa{display:inline-flex;align-items:center;gap:9px;background:var(--primary);color:var(--ink);text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:700;margin:8px 6px 0}
+  a.wa:hover{background:#cfc6ff}
+  @media print{
+    .no-print{display:none!important}
+    body{background:#fff;color:#1B1B1B}
+    .card{background:#fff!important;border:1px solid #ddd;box-shadow:none}
+    h1,h2,.res h3{color:#1B1B1B!important}
+    p.lead{color:#333} .nota,.micro,.res p,.rcard .l,.nivel .nopt{color:#555}
+    header.top .logo{filter:none}
+    .bignum{color:#3E2F86!important} .qnum,.star{color:#5B4FB0!important}
+    a.wa{color:#1B1B1B}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><img src="assets/KOR-mark.svg" alt="KOR Consulting" class="logo"><div class="barra"></div></header>
+
+  <!-- INTRO -->
+  <div id="intro" class="card">
+    <h1>¿Por qué se te van las modelos?</h1>
+    <p class="lead">Una mirada rápida a cómo funciona hoy tu estudio y a tus focos reales de riesgo de rotación. Son 10 preguntas y te toma unos 3 minutos.</p>
+    <p class="nota">Es una autoevaluación: refleja tu propia mirada y sirve como punto de partida, no como diagnóstico. Tus respuestas se quedan en este dispositivo; nada se envía.</p>
+    <label class="f" for="nombreEstudio">Nombre de tu estudio (opcional, para tu resumen)</label>
+    <input type="text" id="nombreEstudio" placeholder="Ej. Estudio Norte">
+    <div class="row"><button class="btn-primario" onclick="start()">Empezar diagnóstico</button></div>
+  </div>
+
+  <!-- CONTEXT -->
+  <div id="context" class="card hidden">
+    <div class="qnum">Antes de empezar · opcional</div>
+    <h2>Para estimar tu rotación</h2>
+    <p class="nota">Puedes saltarlo. Sirve solo para personalizar tu resultado. Nada se guarda.</p>
+    <label class="f">¿Cuántas modelos hay activas hoy?</label>
+    <select id="cActivas">
+      <option value="">Prefiero no decir</option>
+      <option value="3">1 a 5</option><option value="10">6 a 15</option>
+      <option value="28">16 a 40</option><option value="50">Más de 40</option>
+    </select>
+    <label class="f">En los últimos 6 meses, ¿más o menos cuántas se han ido?</label>
+    <select id="cSalidas">
+      <option value="">No llevo la cuenta</option>
+      <option value="0">Ninguna</option><option value="2">1 a 3</option>
+      <option value="7">4 a 10</option><option value="14">Más de 10</option>
+    </select>
+    <div class="row"><button class="btn-sec" onclick="goQuestions()">Saltar</button><button class="btn-primario" onclick="goQuestions()">Continuar</button></div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="quiz" class="card hidden">
+    <div class="progress"><i id="bar"></i></div>
+    <div class="qnum" id="qnum"></div>
+    <h2 id="qtext"></h2>
+    <div class="niveles" id="opts"></div>
+    <div class="prio"><input type="checkbox" id="prioChk" onchange="togglePrio()"><label for="prioChk">Este es de los que más me preocupa</label></div>
+    <div class="row">
+      <button class="btn-sec" onclick="prev()" id="prevBtn">Atrás</button>
+      <button class="btn-primario" onclick="next()" id="nextBtn">Siguiente</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="hidden"></div>
+</div>
+
+<script>
+const WHATSAPP = "573045688505"; // número real de KOR
+const MSG_AGENDA = "Hola, hice el diagnóstico de rotación de KÓR y quiero agendar la conversación.";
+
+const PROCESSES = [
+  {n:"Reclutamiento y selección", q:"¿Cómo se selecciona a las modelos que ingresan al estudio?",
+   o:["Se acepta a casi cualquier persona que cumpla lo básico.","Hay una idea de qué se busca, pero nada fijo.","Hay criterios claros y una forma definida de seleccionar."],
+   m:["Estás contratando a quien llega, no a quien encaja. Sin filtrar expectativas, muchas entran pensando una cosa y encuentran otra: esas son las que renuncian en las primeras semanas.",
+      "Tienes intuición, pero no un criterio repetible. El riesgo es que todo depende de ti y no se sostiene cuando creces o delegas.",
+      "Filtras desde la entrada, bien. La pregunta que sigue es si los criterios con que eliges son los que de verdad se quedan, o solo los que parecen prometer al entrar."]},
+  {n:"Inducción / onboarding", q:"Cuando una modelo ingresa, ¿de qué forma aprende a trabajar en el estudio?",
+   o:["Aprende sola, sobre la marcha, observando a las demás.","Alguien le explica lo básico, pero no siempre igual.","Recibe una inducción definida, igual para todas."],
+   m:["Las primeras semanas son donde más se renuncia. Si la modelo queda sola descifrando todo, la sensación de 'esto no es para mí' llega rápido.",
+      "La inducción existe pero depende de quién la dé. Lo que una recibe, otra no, y esa inconsistencia se siente como desorden.",
+      "Base sólida. Siguiente nivel: medir si la inducción de verdad reduce las salidas tempranas."]},
+  {n:"Capacitación", q:"¿Cómo mejoran las modelos del estudio en lo que hacen?",
+   o:["Aprenden solas, por ensayo y error.","Las más experimentadas ayudan a las nuevas, sin un plan.","Hay formación organizada (comunicación, autocuidado, desempeño)."],
+   m:["Sin acompañamiento, las que no arrancan rápido se frustran y se van antes de despegar.",
+      "El conocimiento existe, pero vive en pocas personas. Cuando una de ellas se va, se lleva consigo lo que sabía y al estudio le toca reconstruir ese saber desde cero.",
+      "Inviertes en que crezcan, y eso fideliza. Siguiente nivel: conectar la formación con indicadores de permanencia."]},
+  {n:"Evaluación de desempeño", q:"¿Cómo sabe una modelo si lo está haciendo bien o mal?",
+   o:["Por lo que factura, nada más.","Se le dan comentarios cuando algo pasa, no de forma regular.","Tiene indicadores claros y retroalimentación periódica."],
+   m:["Si lo único que escucha es cuánto factura, se siente un número. La comparación y la presión sin acompañamiento queman rápido.",
+      "El feedback reactivo (solo cuando algo sale mal) genera relación de regaño, no de crecimiento.",
+      "Tienes una conversación de desempeño sana. Lo que casi nadie revisa es si esos indicadores también captan el desgaste y no solo el rendimiento: a veces la modelo que mejor factura es la que está más cerca de renunciar."]},
+  {n:"Retención de talento", q:"¿Se conocen las razones reales por las que renuncian las modelos?",
+   o:["No se conocen con certeza.","Hay sospechas, pero no se registran.","Se registran y se actúa sobre ellas."],
+   m:["No puedes resolver lo que no mides. Si no sabes por qué se van, estás tapando el mismo hueco una y otra vez. Este es el centro del problema de rotación.",
+      "Intuyes las causas pero sin registro no ves patrones, y sin patrones no hay solución, solo reacción.",
+      "Registras y actúas: vas adelante de la mayoría. La pregunta que sigue es si lo que registras explica de verdad por qué se van, o solo lo que dicen al salir."]},
+  {n:"Bienestar laboral", q:"¿Qué se hace con el desgaste emocional propio de este trabajo?",
+   o:["No hay nada formal para eso.","Se está pendiente, pero de manera informal.","Hay mecanismos de apoyo y seguimiento de carga."],
+   m:["Este es un trabajo emocionalmente intenso: exposición constante, comparación y largas jornadas frente a cámara. El desgaste que no se atiende no avisa: se vuelve renuncias silenciosas y, con cada salida, se va lo que invertiste en formarla. Cuidar el bienestar no es un gasto, es lo que sostiene tu operación.",
+      "Tu intención está, y eso ya cuenta. Pero 'estar pendiente' no escala ni deja rastro: cuando hay muchas, lo informal se pierde y las que peor están suelen ser las que menos lo dicen. Formalizar el cuidado es lo que lo vuelve confiable.",
+      "Cuidar la carga emocional es de las cosas que más retienen en este sector, y ya lo haces. El paso que multiplica su efecto es que ese cuidado llegue a todas —no solo a las que se atreven a pedirlo—, porque la que se quiebra en silencio es la que terminas perdiendo sin verlo venir."]},
+  {n:"Comunicación interna", q:"Cuando una modelo tiene una queja, una inconformidad o un problema, ¿tiene una forma clara de plantearlo y de que alguien la escuche?",
+   o:["No hay una forma definida; depende del momento y de a quién le tenga confianza.","Puede hablar con alguien, pero no hay un canal establecido.","Hay un canal claro y confidencial para hacerlo."],
+   m:["Sin una vía clara para hablar, la inconformidad no desaparece: se guarda en silencio y crece hasta que la decisión de irse ya está tomada. Para cuando te enteras, suele ser tarde.",
+      "Que pueda hablar depende de con quién y de cuánta confianza le tenga. Muchas no dirán nada por miedo o pena, y el malestar sigue ahí sin que tú lo veas.",
+      "Tienes una vía para escuchar a tiempo, que es lo difícil. El paso que pocos dan es cerrar el ciclo: que la modelo vea que lo que plantea de verdad cambia algo; si no, el canal deja de usarse."]},
+  {n:"Reglamento interno", q:"Las reglas del estudio, ¿están claras y por escrito?",
+   o:["Se dicen de palabra, según la situación.","Hay algunas escritas, pero incompletas.","Hay un reglamento claro que todas conocen."],
+   m:["Reglas que cambian según el momento se viven como arbitrariedad. Eso erosiona la confianza, y sin confianza no hay permanencia.",
+      "Tener la mitad escrito deja zonas grises, y las zonas grises se llenan de malentendidos.",
+      "Reglas claras dan seguridad. Siguiente nivel: que el reglamento equilibre claridad operativa con dignidad y límites."]},
+  {n:"Gestión de datos", q:"La información de las modelos (contacto, historial, desempeño), ¿cómo se maneja?",
+   o:["Dispersa, en chats o cuadernos.","En archivos, pero sin un sistema.","Sistema con acceso ordenado y protegido."],
+   m:["Cuando una modelo se va, se va también todo lo que sabías de ella. Empiezas de cero cada vez y no puedes ver tendencias de rotación.",
+      "Tienes la información pero no la puedes usar para decidir. El dato disperso no se convierte en aprendizaje.",
+      "Tu información está ordenada y protegida: eso ya te deja decidir con datos y no de memoria. El paso que pocos dan es usarla de verdad —revisarla con regularidad para ver qué se repite— en lugar de que quede archivada y nadie la mire."]},
+  {n:"Rotación / desvinculación", q:"Cuando una modelo se va, ¿qué pasa?",
+   o:["Se va y se busca reemplazo, sin más.","A veces se pregunta por qué, pero no se registra.","Se hace una conversación de salida y se registran las causas."],
+   m:["Reemplazar sin entender por qué se fue garantiza que el siguiente se irá por lo mismo. Es la rueda que no para.",
+      "Preguntas, pero al no registrarlo la información se evapora. Cuando se va la siguiente, no tienes con qué comparar y te toca indagar otra vez desde cero: así nunca ves el patrón que se repite detrás de las salidas.",
+      "Aprendes de cada salida: así se rompe el ciclo. Siguiente nivel: convertir esas causas en cambios concretos de proceso."]}
+];
+
+const PROFILES = [
+  {max:7, name:"Operación por instinto", cls:"bad",
+   txt:"Todo funciona por reacción y memoria. La rotación aquí no es mala suerte: es la consecuencia natural de no tener procesos. Es justo el perfil donde un diagnóstico + intervención da resultados más rápidos y visibles."},
+  {max:14, name:"En construcción", cls:"mid",
+   txt:"Haces varias cosas bien, pero de forma despareja. Cuidado: un proceso a medias puede ser tan riesgoso como no tenerlo, porque genera expectativa y luego inconsistencia. El diagnóstico sirve para cerrar las brechas que están drenando modelos sin que lo notes."},
+  {max:20, name:"Estructurado", cls:"good",
+   txt:"Tienes procesos formalizados; vas adelante del sector. Pero estructura no es lo mismo que efectividad: el riesgo es asumir que tener procesos equivale a que funcionen. La pregunta que un diagnóstico responde es cuáles de tus procesos de verdad están reteniendo y cuáles solo existen en el papel."}
+];
+
+let answers = new Array(PROCESSES.length).fill(null);
+let priority = new Array(PROCESSES.length).fill(false);
+let cur = 0;
+const $ = id => document.getElementById(id);
+
+function start(){ $('intro').classList.add('hidden'); $('context').classList.remove('hidden'); }
+function goQuestions(){ $('context').classList.add('hidden'); $('quiz').classList.remove('hidden'); render(); }
+
+function render(){
+  const p = PROCESSES[cur];
+  $('qnum').textContent = "Proceso " + (cur+1) + " de " + PROCESSES.length + " · " + p.n;
+  $('qtext').textContent = p.q;
+  $('bar').style.width = (cur/PROCESSES.length*100) + "%";
+  $('prevBtn').style.visibility = cur===0 ? "hidden" : "visible";
+  $('nextBtn').textContent = cur===PROCESSES.length-1 ? "Ver mi resultado" : "Siguiente";
+  $('prioChk').checked = priority[cur];
+  const box = $('opts'); box.innerHTML = "";
+  p.o.forEach((txt,i)=>{
+    const b = document.createElement('button');
+    b.className = "nivel" + (answers[cur]===i ? " sel-"+i : "");
+    b.innerHTML = '<span class="ncont"><span class="nopt">'+txt+'</span></span>';
+    b.onclick = ()=>{ answers[cur]=i; render(); };
+    box.appendChild(b);
+  });
+}
+function togglePrio(){ priority[cur] = $('prioChk').checked; }
+function next(){ if(answers[cur]===null){ alert("Elige una opción para continuar."); return; } if(cur<PROCESSES.length-1){cur++; render(); window.scrollTo({top:0,behavior:'smooth'});} else { finish(); } }
+function prev(){ if(cur>0){cur--; render(); window.scrollTo({top:0,behavior:'smooth'});} }
+
+function finish(){
+  $('quiz').classList.add('hidden');
+  const total = answers.reduce((a,b)=>a+b,0);
+  const profile = PROFILES.find(p=>total<=p.max);
+  let nEstr=answers.filter(x=>x===2).length, nInfo=answers.filter(x=>x===1).length, nInex=answers.filter(x=>x===0).length;
+  const order = PROCESSES.map((p,i)=>({i,lvl:answers[i]})).sort((a,b)=>a.lvl-b.lvl);
+  const focos = order.filter(x=>x.lvl<2).slice(0,3);
+  const focosList = focos.length?focos:order.slice(0,3);
+  const nombre = $('nombreEstudio').value.trim();
+
+  let html = '<div class="card profile">';
+  html += '<span class="pill '+profile.cls+'">Perfil: '+profile.name+'</span>';
+  html += '<h2>'+(nombre?('Resumen de '+nombre):'Estos son tus focos de riesgo de rotación')+'</h2>';
+  html += '<p class="micro">Puntaje de madurez: '+total+' / 20</p>';
+  html += '<p style="margin:10px 0 0">'+profile.txt+'</p>';
+  html += '<div class="distbar">'+
+            (nEstr?'<i class="s-estr" style="width:'+(nEstr*10)+'%"></i>':'')+
+            (nInfo?'<i class="s-info" style="width:'+(nInfo*10)+'%"></i>':'')+
+            (nInex?'<i class="s-inex" style="width:'+(nInex*10)+'%"></i>':'')+'</div>';
+  html += '<div class="resumen">'+rcard(nEstr,"con proceso definido","var(--estr)")+rcard(nInfo,"a tu manera","var(--info)")+rcard(nInex,"por empezar","var(--inex)")+'</div></div>';
+
+  const activas = parseFloat($('cActivas').value);
+  const salidas6 = parseFloat($('cSalidas').value);
+  let salidasAnio = 12;
+  if(!isNaN(salidas6)) salidasAnio = salidas6*2;
+  if(!isNaN(activas)&&!isNaN(salidas6)&&activas>0){
+    const rate = Math.round((salidas6*2)/activas*100);
+    html += '<div class="card"><h2>Tu rotación aproximada</h2><div class="bignum">~'+rate+'% al año</div>'+
+      '<p class="micro">Estimado con tus rangos ('+salidas6+' salidas en 6 meses sobre ~'+activas+' activas). Cada salida implica recaptar, reinducir y sostener una silla improductiva durante el arranque.</p></div>';
+  }
+
+  // --- Cruce de realidad: auto-imagen alta vs señales que no encajan ---
+  const altoAuto = total >= 14;
+  const ciegoFuga = Math.min(answers[4], answers[9]) <= 1; // retención (5) y desvinculación (10)
+  let salidasLabel = "";
+  if(salidas6===2) salidasLabel="entre 1 y 3 modelos";
+  else if(salidas6===7) salidasLabel="entre 4 y 10 modelos";
+  else if(salidas6===14) salidasLabel="más de 10 modelos";
+  let cruceParts = [];
+  if(altoAuto && !isNaN(salidas6) && salidas6>=4){
+    cruceParts.push('Marcaste la mayoría de tus procesos como definidos, pero tú mismo reportas que se fueron <b>'+salidasLabel+'</b> en los últimos 6 meses. Si la estructura estuviera frenando la rotación, no estarías perdiendo a tantas. Una de dos: o los procesos no operan como crees, o la causa real de la fuga está en un punto que esta autoevaluación no alcanza a ver.');
+  }
+  if(altoAuto && ciegoFuga){
+    cruceParts.push('Te calificas organizado en casi todo, pero marcaste que <b>no registras o no conoces con certeza por qué renuncian</b> tus modelos. Ahí la estructura no te protege: tienes orden, no inteligencia sobre la fuga. Es justo el punto donde "estructurado" deja de significar "efectivo".');
+  }
+  if(cruceParts.length){
+    html += '<div class="card cruce">'+
+      '<span class="pill" style="background:var(--info)">Una señal que no encaja</span>'+
+      '<h2>Tu puntaje dice una cosa; tus números, otra</h2>'+
+      cruceParts.map(p=>'<p style="margin:0 0 10px">'+p+'</p>').join('')+
+      '<p class="micro">No es un castigo a tu puntaje: es el tipo de punto ciego que un diagnóstico en sitio existe para detectar.</p></div>';
+  }
+
+  html += '<div class="card"><h2>Tu diagnóstico, proceso por proceso</h2>';
+  focosList.forEach(x=>{ const p=PROCESSES[x.i]; const st=priority[x.i]?' <span class="star">★</span>':''; html += '<div class="res l'+x.lvl+'"><h3>'+p.n+st+'</h3><p>'+p.m[x.lvl]+'</p></div>'; });
+  html += '<details><summary>Ver los 10 procesos</summary>';
+  PROCESSES.forEach((p,i)=>{ const st=priority[i]?' <span class="star">★</span>':''; html += '<div class="res l'+answers[i]+'"><h3>'+p.n+st+'</h3><p>'+p.m[answers[i]]+'</p></div>'; });
+  html += '</details>';
+  if(priority.some(x=>x)){ const pr=PROCESSES.filter((p,i)=>priority[i]).map(p=>p.n); html += '<p class="micro" style="margin-top:8px">★ Señalaste como lo que más te preocupa: <b>'+pr.join('; ')+'</b>.</p>'; }
+  html += '</div>';
+
+  html += calcHTML(salidasAnio);
+
+  html += '<div class="card cta"><h2>¿Quieres saber qué hacer con esto?</h2>'+
+    '<p style="margin:0 0 6px">Estos son tus 2-3 focos. En una conversación de 30 minutos los interpretamos juntos y vemos por dónde conviene empezar.</p>'+
+    '<a class="wa" href="https://wa.me/'+WHATSAPP+'/?text='+encodeURIComponent(MSG_AGENDA)+'" target="_blank" rel="noopener">Agendar conversación por WhatsApp</a>'+
+    '<button class="btn-sec no-print" style="margin-top:8px" onclick="window.print()">Imprimir / Guardar PDF</button>'+
+    '<p class="micro" style="margin-top:14px">Este diagnóstico es un punto de partida, no reemplaza un diagnóstico profesional en sitio.</p></div>';
+
+  const r=$('results'); r.innerHTML=html; r.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); bindCalc();
+}
+
+function rcard(n,label,color){ return '<div class="rcard"><div class="n" style="color:'+color+'">'+n+'</div><div class="l">'+label+'</div></div>'; }
+
+function calcHTML(salidasAnio){
+  return '<div class="card calc"><h2>¿Cuánto te puede estar costando la rotación?</h2>'+
+   '<p class="micro">Ajusta los números a tu realidad —o juega con el ejemplo—. Nada se guarda ni se envía: el cálculo ocurre solo en tu pantalla.</p>'+
+   '<div class="field"><label class="f">Modelos que se van al año: <span class="val" id="vSal">'+salidasAnio+'</span></label><input type="range" id="iSal" min="1" max="60" value="'+salidasAnio+'"></div>'+
+   '<div class="field"><label class="f">Semanas en conseguir y dejar lista a una reemplazo: <span class="val" id="vSem">3</span></label><input type="range" id="iSem" min="1" max="12" value="3"></div>'+
+   '<div class="field"><label class="f">Aporte mensual promedio de una modelo al estudio (en tu moneda): <span class="val" id="vAporte">1.000.000</span></label><input type="range" id="iAporte" min="100000" max="10000000" step="100000" value="1000000"></div>'+
+   '<div class="field"><label class="f">En sus primeras semanas, una modelo nueva rinde alrededor del <span class="val" id="vRampa">50</span>% de lo que rinde una con experiencia.</label><input type="range" id="iRampa" min="10" max="100" value="50"></div>'+
+   '<div style="border-top:1px solid var(--linea);margin-top:14px;padding-top:14px">'+
+     '<p class="micro">Estimación conservadora con TUS supuestos (no es un dato del sector):</p>'+
+     '<div class="bignum" id="costOut">—</div><p class="micro" id="costPer"></p>'+
+     '<details><summary>¿Cómo se calcula?</summary><p class="micro">Aporte semanal = aporte mensual ÷ 4,33. Costo por salida = (semanas con silla vacía × aporte semanal) + (semanas de adaptación × aporte semanal × (100% − lo que rinde la nueva)). Costo al año = costo por salida × modelos que se van al año.</p></details>'+
+     '<p class="micro" style="margin-top:10px"><b>En un diagnóstico</b> lo calculamos con tus datos reales y desglosado por causa.</p></div></div>';
+}
+
+function fmt(n){ return Math.round(n).toLocaleString('es-CO'); }
+function bindCalc(){
+  function upd(){
+    const sal=+$('iSal').value, sem=+$('iSem').value, ap=+$('iAporte').value, ra=+$('iRampa').value/100;
+    $('vSal').textContent=sal; $('vSem').textContent=sem; $('vAporte').textContent=fmt(ap); $('vRampa').textContent=Math.round(ra*100);
+    const apSem=ap/4.33; const per=(sem*apSem)+(sem*apSem*(1-ra)); const anio=per*sal;
+    $('costOut').textContent="~ "+fmt(anio)+" al año"; $('costPer').textContent="≈ "+fmt(per)+" por cada salida.";
+  }
+  ['iSal','iSem','iAporte','iRampa'].forEach(id=>$(id).addEventListener('input',upd)); upd();
+}
+</script>
+</body>
+</html>
